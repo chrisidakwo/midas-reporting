@@ -1,0 +1,95 @@
+$gray-100: #F1F5F9 !default;
+$gray-200: #E2E8F0 !default;
+$gray-300: #CFD8E3 !default;
+$gray-400: #97A6BA !default;
+$gray-500: #64748B !default;
+$gray-600: #475569 !default;
+$gray-700: #364152 !default;
+$gray-800: #27303F !default;
+$gray-900: #1A202E !default;
+
+
+$black: #000000 !default;
+$white: #FFFFFF !default;
+$blue: #0033a0 !default;
+$indigo: #6875F5 !default;
+$purple: #9061F9 !default;
+$pink: #E74694 !default;
+$red: #F05252 !default;
+$orange: #FF5A1F !default;
+$yellow: #C27803 !default;
+$green: #0E9F6E !default;
+$teal: #0694A2 !default;
+$cyan: #17a2b8 !default;
+
+$colors: (
+        "blue": $blue,
+        "indigo": $indigo,
+        "purple": $purple,
+        "pink": $pink,
+        "red": $red,
+        "orange": $orange,
+        "yellow": $yellow,
+        "green": $green,
+        "teal": $teal,
+        "cyan": $cyan,
+        "white": $white,
+        "gray": $gray-600,
+        "gray-dark": $gray-800
+) !default;
+
+$primary: $blue !default;
+$secondary: $gray-500 !default;
+$success: $green !default;
+$info: $cyan !default;
+$warning: $yellow !default;
+$danger: $red !default;
+$light: $gray-100 !default;
+$dark: $gray-900 !default;
+
+$theme-colors: (
+        "primary": $primary,
+        "secondary": $secondary,
+        "success": $success,
+        "info": $info,
+        "warning": $warning,
+        "danger": $danger,
+        "light": $light,
+        "dark": $dark
+) !default;
+
+
+// Body
+//
+// Settings for the `<body>` element.
+$body-bg: $gray-100 !default;
+$body-color: $gray-800 !default;
+
+$border-color:                $gray-300 !default;
+
+// Gradient
+//
+// The gradient which is added to components if `$enable-gradients` is `true`
+// This gradient is also added to elements with `.bg-gradient`
+// scss-docs-start variable-gradient
+$gradient: linear-gradient(180deg, rgba($white, .15), rgba($white, 0)) !default;
+
+$box-shadow:                  0 1px 3px 0 rgba($black, .1), 0 1px 2px 0 rgba($black, 0.06) !default;
+$box-shadow-sm:               0 1px 2px 0 rgba($black, .05) !default;
+$box-shadow-lg:               0 10px 15px -3px rgba($black, 0.1), 0 4px 6px -2px rgba($black, 0.05) !default;
+$box-shadow-inset:            inset 0 2px 4px 0 rgba($black, 0.06) !default;
+
+// Generate foreground color palette
+$foreground: (
+        base: $black,
+        text: $gray-800,
+        disabled: $gray-400
+);
+
+// Generate background color palette
+$background: (
+        status-bar: $gray-300,
+        app-bar: $white,
+        background: $gray-100,
+        hover: rgba($gray-400, 0.12)
+);
