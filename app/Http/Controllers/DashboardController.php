@@ -13,6 +13,6 @@ class DashboardController extends Controller {
 	 * @return Application|Factory|View
 	 */
 	public function index(Request $request) {
-		return view('dashboard');
+		return view('home');
 	}
 }

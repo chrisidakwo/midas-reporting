@@ -1,6 +1,6 @@
-$gray-100: #F1F5F9 !default;
-$gray-200: #E2E8F0 !default;
-$gray-300: #CFD8E3 !default;
+$gray-100: #f1f5f9 !default;
+$gray-200: #e2e8f0 !default;
+$gray-300: #cfd8e3 !default;
 $gray-400: #97A6BA !default;
 $gray-500: #64748B !default;
 $gray-600: #475569 !default;
@@ -75,6 +75,7 @@ $border-color:                $gray-300 !default;
 $gradient: linear-gradient(180deg, rgba($white, .15), rgba($white, 0)) !default;
 
 $box-shadow:                  0 1px 3px 0 rgba($black, .1), 0 1px 2px 0 rgba($black, 0.06) !default;
+$box-shadow-card:             0 4px 6px -1px rgba($black, 0.1), 0 2px 4px -1px rgba($black, 0.06) !default;
 $box-shadow-sm:               0 1px 2px 0 rgba($black, .05) !default;
 $box-shadow-lg:               0 10px 15px -3px rgba($black, 0.1), 0 4px 6px -2px rgba($black, 0.05) !default;
 $box-shadow-inset:            inset 0 2px 4px 0 rgba($black, 0.06) !default;

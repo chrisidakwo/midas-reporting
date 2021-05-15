@@ -5,7 +5,7 @@ namespace App\Services\Dashboard\Http\Components;
 use Illuminate\View\Component;
 
 class DashboardTileComponent extends Component {
-	public string $gridArea;
+	public ?string $gridArea;
 
 	public ?int $refreshIntervalInSeconds;
 
@@ -13,27 +13,33 @@ class DashboardTileComponent extends Component {
 
 	public bool $show;
 
+	public bool $loading;
+
 	/**
 	 * DashboardTileComponent constructor.
 	 *
-	 * @param string $position
+	 * @param string|null $position
 	 * @param int|null $refreshInterval
 	 * @param string|null $title
 	 * @param bool $show
+	 * @param bool $loading
 	 */
 	public function __construct(
-		string $position,
+		?string $position = null,
 		?int $refreshInterval = null,
 		?string $title = null,
-		bool $show = true
+		bool $show = true,
+		bool $loading = true
 	) {
-		$this->gridArea = $this->convertToGridArea($position);
+		$this->gridArea = ($position) ? $this->convertToGridArea($position) : '';
 
 		$this->refreshIntervalInSeconds = $refreshInterval;
 
 		$this->title = $title;
 
 		$this->show = $show;
+
+		$this->loading = $loading;
 	}
 
 	/**

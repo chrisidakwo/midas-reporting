@@ -5,7 +5,7 @@
 
     <nav class="navigation">
         <div class="navigation-wrapper">
-            <a href="{{ route('movement') }}" class="nav-menu-item {{ request()->routeIs(['movement']) ? 'active' : '' }}">
+            <a href="{{ route('movement.index') }}" class="nav-menu-item {{ request()->routeIs(['movement.index']) ? 'active' : '' }}">
                 <div class="nav-item-wrapper">
                     <div class="nav-item">
                         <i class="icon nav-item-icon material-icons-outlined icon-no-color">insights</i>

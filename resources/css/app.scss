@@ -4,23 +4,46 @@
 
 * {
   border-color: $gray-200;
+  // Text rendering
+  text-rendering: optimizeLegibility;
+  -o-text-rendering: optimizeLegibility;
+  -ms-text-rendering: optimizeLegibility;
+  -moz-text-rendering: optimizeLegibility;
+  -webkit-text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
+
+  // Disable default focus outline
+  &:focus {
+    outline: none !important;
+  }
 }
 
-html {
-  box-sizing: border-box; /* 1 */
-  font-family: sans-serif; /* 2 */
-}
-
+/**
+ * Allow adding a border to an element by just adding a border-width.
+ *
+ * By default, the way the browser specifies that an element should have no
+ * border is by setting it's border-style to `none` in the user-agent
+ * stylesheet.
+ *
+ * In order to easily add borders to elements by just setting the `border-width`
+ * property, we change the default border-style for all elements to `solid`, and
+ * use border-width to hide them instead. This way our `border` utilities only
+ * need to set the `border-width` property instead of the entire `border`
+ * shorthand, making our border utilities much more straightforward to compose.
+ *
+ * https://github.com/tailwindcss/tailwindcss/pull/116
+ */
 *,
 *::before,
 *::after {
+  border-width: 0;
+  border-style: solid;
   box-sizing: inherit;
 }
 
 /**
  * Removes the default spacing and border for appropriate elements.
  */
-
 blockquote,
 dl,
 dd,
@@ -45,7 +68,6 @@ button {
  * Work around a Firefox/IE bug where the transparent `button` background
  * results in a loss of the default `button` focus styles.
  */
-
 button:focus {
   outline: 1px dotted;
   outline: 5px auto -webkit-focus-ring-color;
@@ -63,54 +85,10 @@ ul {
   padding: 0;
 }
 
-/**
- * Custom reset styles
- */
-
-/**
- * 1. Use the system font stack as a sane default.
- * 2. Use Tailwind's default "normal" line-height so the user isn't forced
- * to override it to ensure consistency even when using the default theme.
- */
-
 html {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* 1 */
-  line-height: 1.5; /* 2 */
-}
-
-/**
- * Allow adding a border to an element by just adding a border-width.
- *
- * By default, the way the browser specifies that an element should have no
- * border is by setting it's border-style to `none` in the user-agent
- * stylesheet.
- *
- * In order to easily add borders to elements by just setting the `border-width`
- * property, we change the default border-style for all elements to `solid`, and
- * use border-width to hide them instead. This way our `border` utilities only
- * need to set the `border-width` property instead of the entire `border`
- * shorthand, making our border utilities much more straightforward to compose.
- *
- * https://github.com/tailwindcss/tailwindcss/pull/116
- */
-*,
-*::before,
-*::after {
-  border-width: 0;
-  border-style: solid;
-}
-
-/**
- * Undo the `border-style: none` reset that Normalize applies to images so that
- * our `border-{width}` utilities have the expected effect.
- *
- * The Normalize reset is unnecessary for us since we default the border-width
- * to 0 on all elements.
- *
- * https://github.com/tailwindcss/tailwindcss/issues/362
- */
-img {
-  border-style: solid;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  line-height: 1.5;
+  box-sizing: border-box;
 }
 
 textarea {
@@ -146,7 +124,6 @@ h6 {
  * Reset links to optimize for opt-in styling instead of
  * opt-out.
  */
-
 a {
   color: inherit;
   text-decoration: inherit;
@@ -159,7 +136,6 @@ a {
  * supplement a partial reset that is already applied by
  * normalize.css.
  */
-
 button,
 input,
 optgroup,
@@ -176,7 +152,6 @@ textarea {
  * back to the system monospace stack if there is no configured
  * 'mono' font family.
  */
-
 pre,
 code,
 kbd,
@@ -191,7 +166,6 @@ samp {
  *
  * https://github.com/mozdevs/cssremedy/issues/14
  */
-
 img,
 svg,
 video,
@@ -206,7 +180,7 @@ object {
 
 /**
  * Constrain images and videos to the parent width and preserve
- * their instrinsic aspect ratio.
+ * their intrinsic aspect ratio.
  *
  * https://github.com/mozdevs/cssremedy/issues/14
  */
@@ -216,19 +190,10 @@ video {
   height: auto;
 }
 
-* {
-  // Text rendering
-  text-rendering: optimizeLegibility;
-  -o-text-rendering: optimizeLegibility;
-  -ms-text-rendering: optimizeLegibility;
-  -moz-text-rendering: optimizeLegibility;
-  -webkit-text-rendering: optimizeLegibility;
-  -webkit-tap-highlight-color: transparent;
-
-  // Disable default focus outline
-  &:focus {
-    outline: none !important;
-  }
+img {
+  border-style: solid;
+  width: 100%;
+  vertical-align: top;
 }
 
 html,
@@ -242,20 +207,37 @@ body {
   -moz-osx-font-smoothing: auto;
 }
 
-img {
-  width: 100%;
-  vertical-align: top;
-}
-
 // Fix: Disabled placeholder color is too faded on Safari
 input[disabled] {
   opacity: 1;
   -webkit-text-fill-color: currentColor;
 }
 
+
+// Custom class helpers
 .antialiased {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: auto;
+}
+
+.text-5xl {
+  font-size: 2.25rem !important;
+}
+
+.fw-semibold {
+  font-weight: 600 !important;
+}
+
+.tracking-tighter {
+  letter-spacing: -0.05em !important;
+}
+
+.tracking-wider {
+  letter-spacing: 0.05em !important;
+}
+
+.mt-10 {
+  margin-top: 2.5rem !important;
 }
 
 // Bootstrap
@@ -285,6 +267,7 @@ input[disabled] {
 @import "~bootstrap/scss/popover";
 @import "~bootstrap/scss/spinners";
 @import "~bootstrap/scss/utilities/api";
+@import "~bootstrap/scss/helpers/visually-hidden";
 
 // Application CSS
 @import "midas";

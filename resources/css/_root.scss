@@ -13,8 +13,11 @@
   --#{$variable-prefix}font-sans: #{inspect($font-family-sans)};
   --#{$variable-prefix}font-sans-serif: #{inspect($font-family-sans-serif)};
   --#{$variable-prefix}font-monospace: #{inspect($font-family-monospace)};
+  --#{$variable-prefix}font-size-xs: #{inspect($font-size-xs)};
   --#{$variable-prefix}font-size-sm: #{inspect($font-size-sm)};
   --#{$variable-prefix}font-size-md: #{inspect($font-size-md)};
   --#{$variable-prefix}font-size-xl: #{inspect($font-size-xl)};
+  --#{$variable-prefix}text-hint: #{inspect($gray-400)};
   --#{$variable-prefix}gradient: #{$gradient};
+  --#{$variable-prefix}shadow-card: #{$box-shadow-card};
 }

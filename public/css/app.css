@@ -1,4 +1,10 @@
 @charset "UTF-8";
+h6, .h6, h5, .h5, h4, .h4, h3, .h3, h2, .h2, h1, .h1 {
+  margin-top: 0;
+  font-weight: 600;
+  letter-spacing: -0.019em;
+}
+
 :root {
   --midas-blue: #0033a0;
   --midas-indigo: #6875F5;
@@ -19,31 +25,53 @@
   --midas-info: #17a2b8;
   --midas-warning: #C27803;
   --midas-danger: #F05252;
-  --midas-light: #F1F5F9;
+  --midas-light: #f1f5f9;
   --midas-dark: #1A202E;
   --midas-font-sans: "Inter", "system-ui", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --midas-font-sans-serif: "Inter", "system-ui", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --midas-font-monospace: "IBM Plex Mono", SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --midas-font-size-xs: 0.812rem;
   --midas-font-size-sm: 0.75rem;
   --midas-font-size-md: 1rem;
   --midas-font-size-xl: 1.25rem;
+  --midas-text-hint: #97A6BA;
   --midas-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
+  --midas-shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 * {
-  border-color: #E2E8F0;
+  border-color: #e2e8f0;
+  text-rendering: optimizeLegibility;
+  -o-text-rendering: optimizeLegibility;
+  -ms-text-rendering: optimizeLegibility;
+  -moz-text-rendering: optimizeLegibility;
+  -webkit-text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
+}
+*:focus {
+  outline: none !important;
 }
 
-html {
-  box-sizing: border-box;
-  /* 1 */
-  font-family: sans-serif;
-  /* 2 */
-}
-
+/**
+ * Allow adding a border to an element by just adding a border-width.
+ *
+ * By default, the way the browser specifies that an element should have no
+ * border is by setting it's border-style to `none` in the user-agent
+ * stylesheet.
+ *
+ * In order to easily add borders to elements by just setting the `border-width`
+ * property, we change the default border-style for all elements to `solid`, and
+ * use border-width to hide them instead. This way our `border` utilities only
+ * need to set the `border-width` property instead of the entire `border`
+ * shorthand, making our border utilities much more straightforward to compose.
+ *
+ * https://github.com/tailwindcss/tailwindcss/pull/116
+ */
 *,
 *::before,
 *::after {
+  border-width: 0;
+  border-style: solid;
   box-sizing: inherit;
 }
 
@@ -97,54 +125,10 @@ ul {
   padding: 0;
 }
 
-/**
- * Custom reset styles
- */
-/**
- * 1. Use the system font stack as a sane default.
- * 2. Use Tailwind's default "normal" line-height so the user isn't forced
- * to override it to ensure consistency even when using the default theme.
- */
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  /* 1 */
   line-height: 1.5;
-  /* 2 */
-}
-
-/**
- * Allow adding a border to an element by just adding a border-width.
- *
- * By default, the way the browser specifies that an element should have no
- * border is by setting it's border-style to `none` in the user-agent
- * stylesheet.
- *
- * In order to easily add borders to elements by just setting the `border-width`
- * property, we change the default border-style for all elements to `solid`, and
- * use border-width to hide them instead. This way our `border` utilities only
- * need to set the `border-width` property instead of the entire `border`
- * shorthand, making our border utilities much more straightforward to compose.
- *
- * https://github.com/tailwindcss/tailwindcss/pull/116
- */
-*,
-*::before,
-*::after {
-  border-width: 0;
-  border-style: solid;
-}
-
-/**
- * Undo the `border-style: none` reset that Normalize applies to images so that
- * our `border-{width}` utilities have the expected effect.
- *
- * The Normalize reset is unnecessary for us since we default the border-width
- * to 0 on all elements.
- *
- * https://github.com/tailwindcss/tailwindcss/issues/362
- */
-img {
-  border-style: solid;
+  box-sizing: border-box;
 }
 
 textarea {
@@ -248,7 +232,7 @@ object {
 
 /**
  * Constrain images and videos to the parent width and preserve
- * their instrinsic aspect ratio.
+ * their intrinsic aspect ratio.
  *
  * https://github.com/mozdevs/cssremedy/issues/14
  */
@@ -258,16 +242,10 @@ video {
   height: auto;
 }
 
-* {
-  text-rendering: optimizeLegibility;
-  -o-text-rendering: optimizeLegibility;
-  -ms-text-rendering: optimizeLegibility;
-  -moz-text-rendering: optimizeLegibility;
-  -webkit-text-rendering: optimizeLegibility;
-  -webkit-tap-highlight-color: transparent;
-}
-*:focus {
-  outline: none !important;
+img {
+  border-style: solid;
+  width: 100%;
+  vertical-align: top;
 }
 
 html,
@@ -281,11 +259,6 @@ body {
   -moz-osx-font-smoothing: auto;
 }
 
-img {
-  width: 100%;
-  vertical-align: top;
-}
-
 input[disabled] {
   opacity: 1;
   -webkit-text-fill-color: currentColor;
@@ -294,6 +267,26 @@ input[disabled] {
 .antialiased {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: auto;
+}
+
+.text-5xl {
+  font-size: 2.25rem !important;
+}
+
+.fw-semibold {
+  font-weight: 600 !important;
+}
+
+.tracking-tighter {
+  letter-spacing: -0.05em !important;
+}
+
+.tracking-wider {
+  letter-spacing: 0.05em !important;
+}
+
+.mt-10 {
+  margin-top: 2.5rem !important;
 }
 
 *,
@@ -315,7 +308,7 @@ body {
   font-weight: 400;
   line-height: 1.5;
   color: #27303F;
-  background-color: #F1F5F9;
+  background-color: #f1f5f9;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
@@ -335,7 +328,7 @@ hr:not([size]) {
 h6, .h6, h5, .h5, h4, .h4, h3, .h3, h2, .h2, h1, .h1 {
   margin-top: 0;
   margin-bottom: 0.5rem;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.2;
 }
 
@@ -832,8 +825,8 @@ progress {
 
 .img-thumbnail {
   padding: 0.25rem;
-  background-color: #F1F5F9;
-  border: 1px solid #CFD8E3;
+  background-color: #f1f5f9;
+  border: 1px solid #cfd8e3;
   border-radius: 0.25rem;
   max-width: 100%;
   height: auto;
@@ -2195,7 +2188,7 @@ progress {
   margin-bottom: 1rem;
   color: #27303F;
   vertical-align: top;
-  border-color: #CFD8E3;
+  border-color: #cfd8e3;
 }
 .table > :not(caption) > * > * {
   padding: 0.5rem 0.5rem;
@@ -2320,7 +2313,7 @@ progress {
 }
 
 .table-light {
-  --midas-table-bg: #F1F5F9;
+  --midas-table-bg: #f1f5f9;
   --midas-table-striped-bg: #e5e9ed;
   --midas-table-striped-color: #000000;
   --midas-table-active-bg: #d9dde0;
@@ -2462,11 +2455,11 @@ progress {
   opacity: 1;
 }
 .form-control:-moz-read-only {
-  background-color: #E2E8F0;
+  background-color: #e2e8f0;
   opacity: 1;
 }
 .form-control:disabled, .form-control:read-only {
-  background-color: #E2E8F0;
+  background-color: #e2e8f0;
   opacity: 1;
 }
 .form-control::file-selector-button {
@@ -2475,7 +2468,7 @@ progress {
   -webkit-margin-end: 0.75rem;
           margin-inline-end: 0.75rem;
   color: #27303F;
-  background-color: #E2E8F0;
+  background-color: #e2e8f0;
   pointer-events: none;
   border-color: inherit;
   border-style: solid;
@@ -2501,7 +2494,7 @@ progress {
   -webkit-margin-end: 0.75rem;
           margin-inline-end: 0.75rem;
   color: #27303F;
-  background-color: #E2E8F0;
+  background-color: #e2e8f0;
   pointer-events: none;
   border-color: inherit;
   border-style: solid;
@@ -2634,7 +2627,7 @@ textarea.form-control-lg {
   background-image: none;
 }
 .form-select:disabled {
-  background-color: #E2E8F0;
+  background-color: #e2e8f0;
 }
 .form-select:-moz-focusring {
   color: transparent;
@@ -2773,10 +2766,10 @@ textarea.form-control-lg {
   outline: 0;
 }
 .form-range:focus::-webkit-slider-thumb {
-  box-shadow: 0 0 0 1px #F1F5F9, 0 0 0 0.25rem rgba(0, 51, 160, 0.25);
+  box-shadow: 0 0 0 1px #f1f5f9, 0 0 0 0.25rem rgba(0, 51, 160, 0.25);
 }
 .form-range:focus::-moz-range-thumb {
-  box-shadow: 0 0 0 1px #F1F5F9, 0 0 0 0.25rem rgba(0, 51, 160, 0.25);
+  box-shadow: 0 0 0 1px #f1f5f9, 0 0 0 0.25rem rgba(0, 51, 160, 0.25);
 }
 .form-range::-moz-focus-outer {
   border: 0;
@@ -2807,7 +2800,7 @@ textarea.form-control-lg {
   height: 0.5rem;
   color: transparent;
   cursor: pointer;
-  background-color: #CFD8E3;
+  background-color: #cfd8e3;
   border-color: transparent;
   border-radius: 1rem;
 }
@@ -2836,7 +2829,7 @@ textarea.form-control-lg {
   height: 0.5rem;
   color: transparent;
   cursor: pointer;
-  background-color: #CFD8E3;
+  background-color: #cfd8e3;
   border-color: transparent;
   border-radius: 1rem;
 }
@@ -2958,7 +2951,7 @@ textarea.form-control-lg {
   color: #27303F;
   text-align: center;
   white-space: nowrap;
-  background-color: #E2E8F0;
+  background-color: #e2e8f0;
   border: 1px solid #97A6BA;
   border-radius: 0.25rem;
 }
@@ -3389,8 +3382,8 @@ textarea.form-control-lg {
 
 .btn-light {
   color: #000000;
-  background-color: #F1F5F9;
-  border-color: #F1F5F9;
+  background-color: #f1f5f9;
+  border-color: #f1f5f9;
 }
 .btn-light:hover {
   color: #000000;
@@ -3413,8 +3406,8 @@ textarea.form-control-lg {
 }
 .btn-light:disabled, .btn-light.disabled {
   color: #000000;
-  background-color: #F1F5F9;
-  border-color: #F1F5F9;
+  background-color: #f1f5f9;
+  border-color: #f1f5f9;
 }
 
 .btn-dark {
@@ -3598,27 +3591,27 @@ textarea.form-control-lg {
 }
 
 .btn-outline-light {
-  color: #F1F5F9;
-  border-color: #F1F5F9;
+  color: #f1f5f9;
+  border-color: #f1f5f9;
 }
 .btn-outline-light:hover {
   color: #000000;
-  background-color: #F1F5F9;
-  border-color: #F1F5F9;
+  background-color: #f1f5f9;
+  border-color: #f1f5f9;
 }
 .btn-check:focus + .btn-outline-light, .btn-outline-light:focus {
   box-shadow: 0 0 0 0.25rem rgba(241, 245, 249, 0.5);
 }
 .btn-check:checked + .btn-outline-light, .btn-check:active + .btn-outline-light, .btn-outline-light:active, .btn-outline-light.active, .btn-outline-light.dropdown-toggle.show {
   color: #000000;
-  background-color: #F1F5F9;
-  border-color: #F1F5F9;
+  background-color: #f1f5f9;
+  border-color: #f1f5f9;
 }
 .btn-check:checked + .btn-outline-light:focus, .btn-check:active + .btn-outline-light:focus, .btn-outline-light:active:focus, .btn-outline-light.active:focus, .btn-outline-light.dropdown-toggle.show:focus {
   box-shadow: 0 0 0 0.25rem rgba(241, 245, 249, 0.5);
 }
 .btn-outline-light:disabled, .btn-outline-light.disabled {
-  color: #F1F5F9;
+  color: #f1f5f9;
   background-color: transparent;
 }
 
@@ -3916,7 +3909,7 @@ textarea.form-control-lg {
 }
 .dropdown-item:hover, .dropdown-item:focus {
   color: #171d29;
-  background-color: #E2E8F0;
+  background-color: #e2e8f0;
 }
 .dropdown-item.active, .dropdown-item:active {
   color: #FFFFFF;
@@ -3949,12 +3942,12 @@ textarea.form-control-lg {
 }
 
 .dropdown-menu-dark {
-  color: #CFD8E3;
+  color: #cfd8e3;
   background-color: #27303F;
   border-color: rgba(0, 0, 0, 0.15);
 }
 .dropdown-menu-dark .dropdown-item {
-  color: #CFD8E3;
+  color: #cfd8e3;
 }
 .dropdown-menu-dark .dropdown-item:hover, .dropdown-menu-dark .dropdown-item:focus {
   color: #FFFFFF;
@@ -3971,7 +3964,7 @@ textarea.form-control-lg {
   border-color: rgba(0, 0, 0, 0.15);
 }
 .dropdown-menu-dark .dropdown-item-text {
-  color: #CFD8E3;
+  color: #cfd8e3;
 }
 .dropdown-menu-dark .dropdown-header {
   color: #64748B;
@@ -4103,7 +4096,7 @@ textarea.form-control-lg {
 }
 
 .nav-tabs {
-  border-bottom: 1px solid #CFD8E3;
+  border-bottom: 1px solid #cfd8e3;
 }
 .nav-tabs .nav-link {
   margin-bottom: -1px;
@@ -4113,7 +4106,7 @@ textarea.form-control-lg {
   border-top-right-radius: 0.25rem;
 }
 .nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus {
-  border-color: #E2E8F0 #E2E8F0 #CFD8E3;
+  border-color: #e2e8f0 #e2e8f0 #cfd8e3;
   isolation: isolate;
 }
 .nav-tabs .nav-link.disabled {
@@ -4124,8 +4117,8 @@ textarea.form-control-lg {
 .nav-tabs .nav-link.active,
 .nav-tabs .nav-item.show .nav-link {
   color: #364152;
-  background-color: #F1F5F9;
-  border-color: #CFD8E3 #CFD8E3 #F1F5F9;
+  background-color: #f1f5f9;
+  border-color: #cfd8e3 #cfd8e3 #f1f5f9;
 }
 .nav-tabs .dropdown-menu {
   margin-top: -1px;
@@ -4684,7 +4677,7 @@ textarea.form-control-lg {
   color: #0033a0;
   text-decoration: none;
   background-color: #FFFFFF;
-  border: 1px solid #CFD8E3;
+  border: 1px solid #cfd8e3;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -4695,13 +4688,13 @@ textarea.form-control-lg {
 .page-link:hover {
   z-index: 2;
   color: #002980;
-  background-color: #E2E8F0;
-  border-color: #CFD8E3;
+  background-color: #e2e8f0;
+  border-color: #cfd8e3;
 }
 .page-link:focus {
   z-index: 3;
   color: #002980;
-  background-color: #E2E8F0;
+  background-color: #e2e8f0;
   outline: 0;
   box-shadow: 0 0 0 0.25rem rgba(0, 51, 160, 0.25);
 }
@@ -4719,7 +4712,7 @@ textarea.form-control-lg {
   color: #475569;
   pointer-events: none;
   background-color: #FFFFFF;
-  border-color: #CFD8E3;
+  border-color: #cfd8e3;
 }
 
 .page-link {
@@ -4988,7 +4981,7 @@ textarea.form-control-lg {
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1rem;
-  border-bottom: 1px solid #CFD8E3;
+  border-bottom: 1px solid #cfd8e3;
   border-top-left-radius: calc(0.3rem - 1px);
   border-top-right-radius: calc(0.3rem - 1px);
 }
@@ -5015,7 +5008,7 @@ textarea.form-control-lg {
   align-items: center;
   justify-content: flex-end;
   padding: 0.75rem;
-  border-top: 1px solid #CFD8E3;
+  border-top: 1px solid #cfd8e3;
   border-bottom-right-radius: calc(0.3rem - 1px);
   border-bottom-left-radius: calc(0.3rem - 1px);
 }
@@ -5674,7 +5667,7 @@ textarea.form-control-lg {
 }
 
 .border {
-  border: 1px solid #CFD8E3 !important;
+  border: 1px solid #cfd8e3 !important;
 }
 
 .border-0 {
@@ -5682,7 +5675,7 @@ textarea.form-control-lg {
 }
 
 .border-top {
-  border-top: 1px solid #CFD8E3 !important;
+  border-top: 1px solid #cfd8e3 !important;
 }
 
 .border-top-0 {
@@ -5690,7 +5683,7 @@ textarea.form-control-lg {
 }
 
 .border-end {
-  border-right: 1px solid #CFD8E3 !important;
+  border-right: 1px solid #cfd8e3 !important;
 }
 
 .border-end-0 {
@@ -5698,7 +5691,7 @@ textarea.form-control-lg {
 }
 
 .border-bottom {
-  border-bottom: 1px solid #CFD8E3 !important;
+  border-bottom: 1px solid #cfd8e3 !important;
 }
 
 .border-bottom-0 {
@@ -5706,7 +5699,7 @@ textarea.form-control-lg {
 }
 
 .border-start {
-  border-left: 1px solid #CFD8E3 !important;
+  border-left: 1px solid #cfd8e3 !important;
 }
 
 .border-start-0 {
@@ -5738,7 +5731,7 @@ textarea.form-control-lg {
 }
 
 .border-light {
-  border-color: #F1F5F9 !important;
+  border-color: #f1f5f9 !important;
 }
 
 .border-dark {
@@ -6567,7 +6560,7 @@ textarea.form-control-lg {
 }
 
 .text-light {
-  color: #F1F5F9 !important;
+  color: #f1f5f9 !important;
 }
 
 .text-dark {
@@ -6623,7 +6616,7 @@ textarea.form-control-lg {
 }
 
 .bg-light {
-  background-color: #F1F5F9 !important;
+  background-color: #f1f5f9 !important;
 }
 
 .bg-dark {
@@ -6631,7 +6624,7 @@ textarea.form-control-lg {
 }
 
 .bg-body {
-  background-color: #F1F5F9 !important;
+  background-color: #f1f5f9 !important;
 }
 
 .bg-white {
@@ -10043,6 +10036,19 @@ textarea.form-control-lg {
     display: none !important;
   }
 }
+.visually-hidden,
+.visually-hidden-focusable:not(:focus):not(:focus-within) {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
 .icon {
   display: inline-flex !important;
   align-items: center;
@@ -10057,6 +10063,13 @@ textarea.form-control-lg {
   font-size: 24px;
   line-height: 24px;
   -webkit-appearance: none !important;
+}
+
+.card {
+  position: relative;
+  overflow: hidden;
+  border: 0px solid #e2e8f0 !important;
+  box-shadow: var(--midas-shadow-card) !important;
 }
 
 .link {
