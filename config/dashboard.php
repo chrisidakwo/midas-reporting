@@ -13,5 +13,16 @@ return [
 	 */
 	'stylesheets' => [
 		'inter' => '/fonts/Inter/inter.css'
+	],
+
+	'charts' => [
+		'refresh_interval_in_seconds' => 300,
+
+		'route_name_prefix' => 'charts',
+
+		'scripts' => [
+			'chart' => '/js/chart.min.js',
+			'chartisan' => '/js/chartisan_chartjs.umd.min.js'
+		]
 	]
 ];

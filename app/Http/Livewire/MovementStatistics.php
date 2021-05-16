@@ -20,7 +20,7 @@ class MovementStatistics extends Component {
 	 * @param string $startDate
 	 * @param string $endDate
 	 */
-	public function mount(string $startDate, string $endDate) {
+	public function mount(string $startDate, string $endDate): void {
 		$this->startDate = $startDate;
 		$this->endDate = $endDate;
 
