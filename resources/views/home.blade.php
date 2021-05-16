@@ -9,7 +9,13 @@
     <div class="row">
         <div class="col-12">
             <div class="px-4">
-                @include('partials.date-selector')
+{{--                @include('partials.date-selector')--}}
+
+                @php
+                    [$startDate, $endDate] = getDefaultStartEndDates();
+                @endphp
+
+                <livewire:date-selector :startDate="$startDate"  :endDate="$endDate" />
             </div>
         </div>
     </div>
@@ -18,11 +24,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="px-4">
-                    @php
-                        [$startDate, $endDate] = getDefaultStartEndDates()
-                    @endphp
-
-                    <livewire:movement-statistics startDate="{{ $startDate }}" endDate="{{ $endDate }}"/>
+                    <livewire:movement-statistics :endDate="$endDate"/>
                 </div>
             </div>
         </div>

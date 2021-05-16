@@ -2,34 +2,31 @@
 
 namespace App\Http\Livewire;
 
+use Carbon\Carbon;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class MovementStatisticsComponent extends Component {
+	public Carbon $endDate;
+
 	public array $movementSummary;
 
 	public string $alertedPersons;
-
-	public string $startDate;
-
-	public string $endDate;
 
 	public bool $loading;
 
 	public int $refreshIntervalInSeconds;
 
 	/**
-	 * @param string $startDate
-	 * @param string $endDate
+	 * @param Carbon $endDate
 	 * @param int|null $refreshIntervalInSeconds
 	 */
-	public function mount(string $startDate, string $endDate, int $refreshIntervalInSeconds = null): void {
-		$this->startDate = $startDate;
+	public function mount(Carbon $endDate, int $refreshIntervalInSeconds = null): void {
 		$this->endDate = $endDate;
 
-		$this->loading = true;
+		$this->loading = false;
 
 		$this->refreshIntervalInSeconds = $refreshIntervalInSeconds ?? config('dashboard.charts.refresh_interval_in_seconds', 300);
 

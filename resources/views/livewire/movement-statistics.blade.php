@@ -1,8 +1,8 @@
-<div class="d-flex flex-wrap w-100" style="column-gap: 2rem; row-gap: 0.25rem;">
+<div class="d-flex flex-wrap w-100" style="column-gap: 2rem; row-gap: 1rem;">
     <x-dashboard-tile refreshIntervalInSeconds="10">
         <div class="{{ $loading ? '' : 'visually-hidden ' }}position-absolute h-100 w-100" style="background-color: rgba(241, 245, 249, 0.5)">
             <div class="w-100 d-flex flex-fill flex-column h-100 justify-content-center align-items-center position-relative text-center">
-                <div class="spinner-grow"></div>
+                <div class="spinner-border"></div>
             </div>
         </div>
 
@@ -25,7 +25,7 @@
     <x-dashboard-tile refreshIntervalInSeconds="10">
         <div class="{{ $loading ? '' : 'visually-hidden ' }}position-absolute h-100 w-100" style="background-color: rgba(241, 245, 249, 0.5)">
             <div class="w-100 d-flex flex-fill flex-column h-100 justify-content-center align-items-center position-relative text-center">
-                <div class="spinner-grow"></div>
+                <div class="spinner-border"></div>
             </div>
         </div>
 
@@ -48,7 +48,7 @@
     <x-dashboard-tile :loading="false">
         <div class="{{ $loading ? '' : 'visually-hidden ' }}position-absolute h-100 w-100" style="background-color: rgba(241, 245, 249, 0.5)">
             <div class="w-100 d-flex flex-fill flex-column h-100 justify-content-center align-items-center position-relative text-center">
-                <div class="spinner-grow"></div>
+                <div class="spinner-border"></div>
             </div>
         </div>
 
@@ -72,12 +72,14 @@
 <script defer>
     document.addEventListener('livewire:load', function () {
       // Send ajax request. Retrieve movement statistics and update component
-      let query = window.location.href.split('?').slice(1);
-      let url = "{{ route('movement.summary') }}" + '?' + query;
+      Livewire.on('dateRangeUpdated', (dateRange) => {
+        @this.loading = true;
 
-      sendRequest(url, 'get')
-        .then((response) => {
-          const data = response.data;
+        let url = "{{ route('movement.summary') }}?start_date=" + dateRange.startDate + "&end_date=" + dateRange.endDate;
+
+        sendRequest(url, 'get')
+          .then((response) => {
+            const data = response.data;
 
           @this.movementSummary = updateMovementStatistics(data.Inbound, data.Outbound);
 
@@ -85,12 +87,16 @@
 
           @this.loading = false;
 
-        }, (error) => {
-          console.log(error);
-        });
+          }, (error) => {
+            console.log(error);
+          });
+      });
 
         @if($refreshIntervalInSeconds > 0)
             setInterval(function () {
+              let query = window.location.href.split('?').slice(1);
+              let url = "{{ route('movement.summary') }}?" + query;
+
               sendRequest(url, 'get')
                 .then((response) => {
                   const data = response.data;
