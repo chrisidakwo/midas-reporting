@@ -28,5 +28,19 @@ function getDefaultStartEndDates(Request $request = null): array {
 		$startDate = $endDate->clone()->subDays(29);
 	}
 
-	return [$startDate, $endDate];
+	return [$startDate->startOfDay(), $endDate->endOfDay()];
+}
+
+
+/**
+ * @param Carbon $startDate
+ * @param Carbon $endDate
+ * @return \Illuminate\Support\Carbon
+ */
+function setCacheTTL(Carbon $startDate, Carbon $endDate): \Illuminate\Support\Carbon {
+	if ($startDate->isToday() || $endDate->isToday()) {
+		return now()->addMinutes(5);
+	}
+
+	return now()->addMonths(3);
 }

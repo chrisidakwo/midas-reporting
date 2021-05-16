@@ -2,7 +2,7 @@
     <x-dashboard-tile refreshIntervalInSeconds="10">
         <div class="{{ $loading ? '' : 'visually-hidden ' }}position-absolute h-100 w-100" style="background-color: rgba(241, 245, 249, 0.5)">
             <div class="w-100 d-flex flex-fill flex-column h-100 justify-content-center align-items-center position-relative text-center">
-                <div class="spinner-border"></div>
+                <div class="spinner-grow"></div>
             </div>
         </div>
 
@@ -25,7 +25,7 @@
     <x-dashboard-tile refreshIntervalInSeconds="10">
         <div class="{{ $loading ? '' : 'visually-hidden ' }}position-absolute h-100 w-100" style="background-color: rgba(241, 245, 249, 0.5)">
             <div class="w-100 d-flex flex-fill flex-column h-100 justify-content-center align-items-center position-relative text-center">
-                <div class="spinner-border"></div>
+                <div class="spinner-grow"></div>
             </div>
         </div>
 
@@ -46,6 +46,12 @@
     </x-dashboard-tile>
 
     <x-dashboard-tile :loading="false">
+        <div class="{{ $loading ? '' : 'visually-hidden ' }}position-absolute h-100 w-100" style="background-color: rgba(241, 245, 249, 0.5)">
+            <div class="w-100 d-flex flex-fill flex-column h-100 justify-content-center align-items-center position-relative text-center">
+                <div class="spinner-grow"></div>
+            </div>
+        </div>
+
         <div class="p-4">
             <div class="d-flex align-items-center justify-content-between">
                 <div class="d-flex flex-column">
@@ -75,6 +81,8 @@
 
           @this.movementSummary = updateMovementStatistics(data.Inbound, data.Outbound);
 
+          @this.alertedPersons = Intl.NumberFormat('GB').format(data.Alerts);
+
           @this.loading = false;
 
         }, (error) => {
@@ -88,6 +96,8 @@
                   const data = response.data;
 
                   @this.movementSummary = updateMovementStatistics(data.Inbound, data.Outbound);
+
+                  @this.alertedPersons = Intl.NumberFormat('GB').format(data.Alerts);
 
                 }, (error) => {
                   console.log(error);

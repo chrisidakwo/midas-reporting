@@ -22,7 +22,7 @@
                         [$startDate, $endDate] = getDefaultStartEndDates()
                     @endphp
 
-                    <livewire:movement-statistics startDate="{{ $startDate }}" endDate="{{ $endDate }}" refreshIntervalInSeconds="10"/>
+                    <livewire:movement-statistics startDate="{{ $startDate }}" endDate="{{ $endDate }}"/>
                 </div>
             </div>
         </div>
@@ -38,7 +38,7 @@
                     </div>
 
                     <div class="d-flex flex-wrap w-100">
-                        <livewire:chart-tile chartClass="{{ \App\Charts\TestChart::class }}" refreshIntervalInSeconds="5" />
+{{--                        <livewire:chart-tile chartClass="{{ \App\Charts\TestChart::class }}" refreshIntervalInSeconds="5" />--}}
                     </div>
                 </div>
             </div>
