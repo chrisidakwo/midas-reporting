@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
-use App\Charts\TestChart;
+use App\Charts\Demographics\AgeDemographicsChart;
+use App\Charts\Demographics\GenderDemographicsChart;
+use App\Charts\Demographics\TransportDemographicsChart;
 use App\Console\Commands\MigrateFreshCommand;
 use App\Http\Livewire\DateSelectorComponent;
 use App\Http\Livewire\MovementStatisticsComponent;
@@ -41,7 +43,9 @@ class AppServiceProvider extends ServiceProvider {
 
 		// Register charts
 		$charts->register([
-			TestChart::class
+			GenderDemographicsChart::class,
+			AgeDemographicsChart::class,
+			TransportDemographicsChart::class
 		]);
 	}
 }

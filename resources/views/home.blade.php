@@ -5,16 +5,14 @@
     <span>Home</span>
 @endsection
 
+@php
+    [$startDate, $endDate] = getDefaultStartEndDates();
+@endphp
+
 @section('content')
     <div class="row">
         <div class="col-12">
             <div class="px-4">
-{{--                @include('partials.date-selector')--}}
-
-                @php
-                    [$startDate, $endDate] = getDefaultStartEndDates();
-                @endphp
-
                 <livewire:date-selector :startDate="$startDate"  :endDate="$endDate" />
             </div>
         </div>
