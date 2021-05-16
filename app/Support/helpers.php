@@ -1,9 +1,14 @@
 <?php
 
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
-function getDefaultStartEndDates(): array {
-	$request = request();
+/**
+ * @param Request|null $request
+ * @return Carbon[]
+ */
+function getDefaultStartEndDates(Request $request = null): array {
+	$request = $request ?? request();
 
 	// Set start date
 	if ($startDate = $request->get('start_date')) {
@@ -15,11 +20,7 @@ function getDefaultStartEndDates(): array {
 	// Set end date
 	if ($endDate = $request->get('end_date')) {
 		$endDate = Carbon::parse($endDate);
-	} else {
-		$endDate = today();
-	}
-
-	if ($endDate->gt(today())) {
+	} else if (!$endDate || $endDate->gt(today())) {
 		$endDate = today();
 	}
 

@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Charts\TestChart;
 use App\Console\Commands\MigrateFreshCommand;
+use ConsoleTVs\Charts\Registrar as Charts;
 use Illuminate\Database\Console\Migrations\FreshCommand;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,12 +23,12 @@ class AppServiceProvider extends ServiceProvider {
 	 *
 	 * @return void
 	 */
-	public function boot() {
+	public function boot(Charts $charts) {
 		$this->app->bind(FreshCommand::class, MigrateFreshCommand::class);
 
 		// Register charts
-		app(\ConsoleTVs\Charts\Registrar::class)->register([
-			\App\Charts\TestChart::class
+		$charts->register([
+			TestChart::class
 		]);
 	}
 }

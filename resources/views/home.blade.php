@@ -22,7 +22,7 @@
                         [$startDate, $endDate] = getDefaultStartEndDates()
                     @endphp
 
-                    <livewire:movement-statistics startDate="{{ $startDate }}" endDate="{{ $endDate }}"/>
+                    <livewire:movement-statistics startDate="{{ $startDate }}" endDate="{{ $endDate }}" refreshIntervalInSeconds="10"/>
                 </div>
             </div>
         </div>

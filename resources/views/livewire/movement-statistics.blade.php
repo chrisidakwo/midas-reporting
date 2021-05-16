@@ -56,7 +56,7 @@
 
             <div class="flex align-items-center mt-auto" style="min-height: 2.25rem !important;">
                 <div class="d-flex flex-column">
-                    <div class="fw-semibold text-5xl tracking-tighter lh-sm" id="alerted">23,963</div>
+                    <div class="fw-semibold text-5xl tracking-tighter lh-sm">{{ $alertedPersons }}</div>
                 </div>
             </div>
         </div>
@@ -67,20 +67,54 @@
     document.addEventListener('livewire:load', function () {
       // Send ajax request. Retrieve movement statistics and update component
       let query = window.location.href.split('?').slice(1);
+      let url = "{{ route('movement.summary') }}" + '?' + query;
 
-      $.ajax({
-        url: "{{ route('movement.summary') }}" + '?' + query ,
-        method: 'get',
-        data: { },
-        success: function (res) {
-          @this.movementSummary = {
-            Inbound: Intl.NumberFormat('GB').format(res.Inbound),
-            Outbound: Intl.NumberFormat('GB').format(res.Outbound)
-          };
+      sendRequest(url, 'get')
+        .then((response) => {
+          const data = response.data;
+
+          @this.movementSummary = updateMovementStatistics(data.Inbound, data.Outbound);
 
           @this.loading = false;
-        }
-      });
+
+        }, (error) => {
+          console.log(error);
+        });
+
+        @if($refreshIntervalInSeconds > 0)
+            setInterval(function () {
+              sendRequest(url, 'get')
+                .then((response) => {
+                  const data = response.data;
+
+                  @this.movementSummary = updateMovementStatistics(data.Inbound, data.Outbound);
+
+                }, (error) => {
+                  console.log(error);
+                });
+            }, {{$refreshIntervalInSeconds * 1000}})
+        @endif
     });
+
+    /**
+     * @return {Object}
+     */
+    function updateMovementStatistics(Inbound, Outbound, Alerts) {
+      return {
+        Inbound: Intl.NumberFormat('GB').format(Inbound),
+        Outbound: Intl.NumberFormat('GB').format(Outbound)
+      }
+    }
+
+    /**
+     * @param url
+     * @param method
+     * @returns {AxiosPromise | *}
+     */
+    function sendRequest(url, method) {
+      return axios(url, {
+        method
+      });
+    }
 </script>
 
