@@ -115,7 +115,7 @@
     /**
      * @return {Object}
      */
-    function updateMovementStatistics(Inbound, Outbound, Alerts) {
+    function updateMovementStatistics(Inbound, Outbound) {
       return {
         Inbound: Intl.NumberFormat('GB').format(Inbound),
         Outbound: Intl.NumberFormat('GB').format(Outbound)

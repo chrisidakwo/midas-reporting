@@ -9,6 +9,14 @@ use Illuminate\Support\Facades\Request;
 use Livewire\Component;
 
 class ChartComponent extends Component {
+	public string $maleCount;
+
+	public string $femaleCount;
+
+	public string $maleDifference;
+
+	public string $femaleDifference;
+
 	public string $chartClass;
 
 	public array $chartFilters;
@@ -36,6 +44,11 @@ class ChartComponent extends Component {
 		Request::merge($this->chartFilters);
 
 		$this->refreshIntervalInSeconds = $refreshIntervalInSeconds ?? config('dashboard.charts.refresh_interval_in_seconds', 300);
+
+		$this->maleCount = '0';
+		$this->femaleCount = '0';
+		$this->maleDifference = '0';
+		$this->femaleDifference = '0';
 	}
 
 	/**

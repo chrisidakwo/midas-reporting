@@ -188,6 +188,23 @@
       }
     }
   }
+
+  .footer {
+    color: $gray-500;
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: start;
+    -webkit-justify-content: flex-start;
+    width: 100%;
+    height: 50px;
+    max-height: 50px;
+    min-height: 50px;
+    padding: 0 24px;
+    z-index: 49;
+    background: white;
+    box-shadow: 0 -1px 0 0 $gray-200;
+  }
 }
 
 // Date range picker

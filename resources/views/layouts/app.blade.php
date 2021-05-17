@@ -26,6 +26,8 @@
                 @yield('content')
             </div>
         </main>
+
+        <footer class="footer">IOM Nigeria © 2021</footer>
     </div>
 
     <script src="{{ mix('js/manifest.js') }}"></script>

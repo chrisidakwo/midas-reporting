@@ -6,12 +6,32 @@ use Carbon\Carbon;
 
 interface DataRepository {
 	/**
-	 * Get the total number of doubtable persons within the provided start and end dates
+	 * Get summary of passengers' movements within the provided start and end dates, and border point.
 	 *
 	 * @param Carbon $startDate
 	 * @param Carbon $endDate
-	 * @param int|string|null $borderPoint
+	 * @param int|null $borderPoint
 	 * @return array
 	 */
-	public function getCountOfDoubtablePersons(Carbon $startDate, Carbon $endDate, $borderPoint = null): array;
+	public function getMovementSummary(Carbon $startDate, Carbon $endDate, int $borderPoint = null): array;
+
+	/**
+	 * Get the total number of doubtable persons within the provided start and end dates.
+	 *
+	 * @param Carbon $startDate
+	 * @param Carbon $endDate
+	 * @param int|null $borderPoint
+	 * @return array
+	 */
+	public function getDoubtablePersons(Carbon $startDate, Carbon $endDate, int $borderPoint = null): array;
+
+	/**
+	 * Get a full report of travellers (including personal and border data) within the provided start and end dates.
+	 *
+	 * @param Carbon $startDate
+	 * @param Carbon $endDate
+	 * @param int|null $borderPoint
+	 * @return array
+	 */
+	public function getTravellersReportStatistics(Carbon $startDate, Carbon $endDate, int $borderPoint = null): array;
 }

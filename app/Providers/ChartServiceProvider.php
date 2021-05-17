@@ -15,6 +15,7 @@ class ChartServiceProvider extends ServiceProvider {
 	 */
 	public function boot() {
 		Livewire::component('chart-tile', ChartComponent::class);
+		Livewire::component('chart-tile', ChartComponent::class);
 
 		Dashboard::script(config('dashboard.charts.scripts.chart'));
 
