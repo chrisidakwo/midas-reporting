@@ -46,7 +46,7 @@
                             <div class="card d-flex flex-column flex-fill">
                                 <div class="card-body p-0">
                                     <div class="overflow-hidden">
-                                        <livewire:chart-tile chartClass="{{ \App\Charts\Demographics\GenderDemographicsChart::class }}" refreshIntervalInSeconds="10" />
+                                        <livewire:gender-chart-tile title="Gender" chartClass="{{ \App\Charts\Demographics\GenderDemographicsChart::class }}" refreshIntervalInSeconds="100" />
                                     </div>
                                 </div>
                             </div>
@@ -56,7 +56,7 @@
                             <div class="card d-flex flex-column flex-fill">
                                 <div class="card-body p-0">
                                     <div class="overflow-hidden">
-{{--                                        <livewire:chart-tile chartClass="{{ \App\Charts\Demographics\GenderDemographicsChart::class }}" refreshIntervalInSeconds="10" />--}}
+{{--                                        <livewire:chart-tile title="Transportation Mode" chartClass="{{ \App\Charts\Demographics\TransportDemographicsChart::class }}" refreshIntervalInSeconds="100" />--}}
                                     </div>
                                 </div>
                             </div>

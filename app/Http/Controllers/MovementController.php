@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\TransportTypes;
 use App\Repositories\DataRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,6 +18,14 @@ class MovementController extends Controller {
 	}
 
 	public function index(Request $request) {
+		[$start, $end] = getDefaultStartEndDates();
+
+//		$travellers = $this->dataRepository->getTravellersReportStatistics($start, $end);
+//
+//		dd(collect($travellers)->groupBy('Sex')->map(static function ($value) {
+//			return count($value);
+//		}));
+
 		return view('movement.index');
 	}
 
