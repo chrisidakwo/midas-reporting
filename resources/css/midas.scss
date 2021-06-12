@@ -1,3 +1,20 @@
+input {
+  color: $gray-700;
+  outline: none;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+
+  &:focus {
+    outline: none;
+    border-color: $blue-500;
+  }
+}
+
+.vc-popover-content-wrapper {
+  z-index: 9999 !important;
+}
+
 .icon {
   display: inline-flex !important;
   align-items: center;

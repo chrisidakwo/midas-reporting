@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\TransportTypes;
 use App\Repositories\DataRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -43,5 +42,23 @@ class MovementController extends Controller {
 		return response()->json(array_merge($movementSummary, [
 			'Alerts' => $alertedPersons
 		]));
+	}
+
+	/**
+	 * @param Request $request
+	 * @return JsonResponse
+	 */
+	public function genderDemographics(Request $request): JsonResponse {
+		[$start, $end] = getDefaultStartEndDates();
+
+		$travellers = $this->dataRepository->getTravellersReportStatistics($start, $end);
+
+		$data = collect($travellers)->groupBy('Sex')->map(static function ($value) {
+			return count($value);
+		})->values()->toArray();
+
+		\Log::info('Gender Data', $data);
+
+		return response()->json($data);
 	}
 }

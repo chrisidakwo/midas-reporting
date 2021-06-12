@@ -54,6 +54,8 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+	'domain' => env('APP_DOMAIN', 'midas-reporting.herokuapp.com'),
+
     'asset_url' => env('ASSET_URL', null),
 
     /*
@@ -228,7 +230,8 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
-	    'Dashboard' => App\Services\Dashboard\Facade\Dashboard::class
+	    'Dashboard' => App\Services\Dashboard\Facade\Dashboard::class,
+	    'Inertia' => Inertia\Inertia::class
     ],
 
 ];

@@ -294,6 +294,123 @@ input[disabled] {
   height: 0.5rem !important;
 }
 
+.left-0 {
+  left: 0;
+}
+
+.right-0 {
+  right: 0;
+}
+
+.rounded-r {
+  border-top-right-radius: 0.25rem !important;
+  border-bottom-right-radius: 0.25rem !important;
+}
+
+.border-blue-200 {
+  border-color: $blue-200 !important;
+}
+
+.hover\:bg-blue-200 {
+  &:hover {
+    background-color: $blue-200 !important;
+  }
+}
+
+.text-blue-600 {
+  color: $blue-600 !important;
+}
+
+.focus\:bg-blue-500 {
+  &:focus {
+    background-color: $blue-500 !important;
+  }
+}
+
+.focus\:text-white {
+  &:focus {
+    color: white !important;
+  }
+}
+
+.focus\:border-blue-500 {
+  &:focus {
+    border-color: $blue-500 !important;
+  }
+}
+
+.focus\:border-blue-300 {
+  &:focus {
+    border-color: $blue-300 !important;
+  }
+}
+
+.focus\:outline-none {
+  &:focus {
+    outline: none !important;
+  }
+}
+
+.w-4 {
+  width: 1rem !important;
+}
+
+.h-4 {
+  height: 1rem !important;
+}
+
+.ml-2 {
+  margin-left: .5rem;
+}
+
+.w-3 {
+  width: 0.75rem !important;
+}
+
+.h-3 {
+  height: 0.75rem !important;
+}
+
+.rounded-full {
+  border-radius: 9999px !important;
+}
+
+.leading-none {
+  line-height: 1 !important;
+}
+
+.h-8 {
+  height: 2rem !important;
+}
+
+.min-h-8 {
+  min-height: 2rem !important;
+}
+
+.max-h-8 {
+  max-height: 2rem !important;
+}
+
+.text-md {
+  font-size: 0.8725rem !important;
+  line-height: 1.25rem !important;
+}
+
+.fill-current {
+  fill: currentColor !important;
+}
+
+.rounded-l {
+  border-top-left-radius: 0.25rem !important;
+  border-bottom-left-radius: 0.25rem !important;
+}
+
+.last\:border-bottom {
+  &:last-child {
+    border-bottom: none !important;
+  }
+}
+
 // Bootstrap
 @import "~bootstrap/scss/functions";
 @import "~bootstrap/scss/variables";

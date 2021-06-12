@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Inertia;
 
 class DashboardController extends Controller {
 	/**
 	 * @param Request $request
-	 * @return Application|Factory|View
+	 * @return Inertia\Response
 	 */
-	public function index(Request $request) {
-		return view('home');
+	public function index(Request $request): Inertia\Response {
+		[$startDate, $endDate] = getDefaultStartEndDates();
+
+		return Inertia::render('Dashboard', compact('startDate', 'endDate'));
 	}
 }

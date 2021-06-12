@@ -343,6 +343,109 @@ input[disabled] {
   height: 0.5rem !important;
 }
 
+.left-0 {
+  left: 0;
+}
+
+.right-0 {
+  right: 0;
+}
+
+.rounded-r {
+  border-top-right-radius: 0.25rem !important;
+  border-bottom-right-radius: 0.25rem !important;
+}
+
+.border-blue-200 {
+  border-color: tint-color(#0033a0, 60%) !important;
+}
+
+.hover\:bg-blue-200:hover {
+  background-color: tint-color(#0033a0, 60%) !important;
+}
+
+.text-blue-600 {
+  color: shade-color(#0033a0, 20%) !important;
+}
+
+.focus\:bg-blue-500:focus {
+  background-color: #0033a0 !important;
+}
+
+.focus\:text-white:focus {
+  color: white !important;
+}
+
+.focus\:border-blue-500:focus {
+  border-color: #0033a0 !important;
+}
+
+.focus\:border-blue-300:focus {
+  border-color: tint-color(#0033a0, 40%) !important;
+}
+
+.focus\:outline-none:focus {
+  outline: none !important;
+}
+
+.w-4 {
+  width: 1rem !important;
+}
+
+.h-4 {
+  height: 1rem !important;
+}
+
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
+.w-3 {
+  width: 0.75rem !important;
+}
+
+.h-3 {
+  height: 0.75rem !important;
+}
+
+.rounded-full {
+  border-radius: 9999px !important;
+}
+
+.leading-none {
+  line-height: 1 !important;
+}
+
+.h-8 {
+  height: 2rem !important;
+}
+
+.min-h-8 {
+  min-height: 2rem !important;
+}
+
+.max-h-8 {
+  max-height: 2rem !important;
+}
+
+.text-md {
+  font-size: 0.8725rem !important;
+  line-height: 1.25rem !important;
+}
+
+.fill-current {
+  fill: currentColor !important;
+}
+
+.rounded-l {
+  border-top-left-radius: 0.25rem !important;
+  border-bottom-left-radius: 0.25rem !important;
+}
+
+.last\:border-bottom:last-child {
+  border-bottom: none !important;
+}
+
 *,
 *::before,
 *::after {
@@ -10101,6 +10204,22 @@ textarea.form-control-lg {
   clip: rect(0, 0, 0, 0) !important;
   white-space: nowrap !important;
   border: 0 !important;
+}
+
+input {
+  color: #364152;
+  outline: none;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+}
+input:focus {
+  outline: none;
+  border-color: #0033a0;
+}
+
+.vc-popover-content-wrapper {
+  z-index: 9999 !important;
 }
 
 .icon {
