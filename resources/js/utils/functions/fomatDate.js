@@ -1,3 +1,7 @@
+/**
+ * @param date
+ * @returns {string}
+ */
 export default function formatDate(date = new Date()) {
   let month = '' + (date.getMonth() + 1);
   let day = '' + date.getDate();

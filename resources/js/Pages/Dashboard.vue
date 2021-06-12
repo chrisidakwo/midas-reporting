@@ -23,7 +23,7 @@
       </div>
     </div>
 
-    <movement-statistics :range="range" />
+    <movement-statistics :series="movementSummary" :loading="movementLoading" />
 
     <div class="row mb-4">
       <div class="col-12">
@@ -40,35 +40,16 @@
       <div class="col-12">
         <div class="px-4">
           <div class="row">
-            <div class="col-sm-4">
-              <div class="card d-flex flex-column flex-fill">
-                <div class="card-body p-0">
-                  <div class="overflow-hidden">
-                    <gender-chart :range="range" />
-<!--                    <livewire:gender-chart-tile title="Gender" chartClass="{{ \App\Charts\Demographics\GenderDemographicsChart::class }}" refreshIntervalInSeconds="100" />-->
-                  </div>
-                </div>
-              </div>
+            <div class="col mb-4">
+              <gender-chart :series="genderStats" :loading="demographicsLoading" />
             </div>
 
-            <div class="col-sm-4">
-              <div class="card d-flex flex-column flex-fill">
-                <div class="card-body p-0">
-                  <div class="overflow-hidden">
-<!--                    <livewire:chart-tile title="Transportation Mode" chartClass="{{ \App\Charts\Demographics\TransportDemographicsChart::class }}" refreshIntervalInSeconds="100" />-->
-                  </div>
-                </div>
-              </div>
+            <div class="col mb-4">
+              <transport-mode-chart :series="transportStats" :loading="demographicsLoading" />
             </div>
 
-            <div class="col-sm-4">
-              <div class="card d-flex flex-column flex-fill">
-                <div class="card-body p-0">
-                  <div class="overflow-hidden">
-<!--                    <livewire:chart-tile chartClass="{{ \App\Charts\Demographics\GenderDemographicsChart::class }}" refreshIntervalInSeconds="10" />-->
-                  </div>
-                </div>
-              </div>
+            <div class="col mb-4">
+              <age-group-chart :series="ageStats" />
             </div>
           </div>
         </div>
@@ -80,12 +61,17 @@
 <script>
 import AppLayout from "../Layouts/AppLayout";
 import AppCard from '../Components/Card';
-import { ref  } from 'vue';
+import { ref } from 'vue';
 import MovementStatistics from "../Components/MovementStatistics";
 import GenderChart from "../Components/GenderChart";
+import TransportModeChart from "../Components/TransportModeChart";
+import AgeGroupChart from "../Components/AgeGroupChart";
+import { formatNumber, buildStartEndDates } from '../utils/functions';
+import { timer } from 'rxjs';
+import { debounce } from 'rxjs/operators';
 
 export default {
-  components: {GenderChart, MovementStatistics, AppLayout, AppCard},
+  components: {AgeGroupChart, TransportModeChart, GenderChart, MovementStatistics, AppLayout, AppCard},
   props: ['startDate', 'endDate'],
 
   setup(props) {
@@ -96,9 +82,38 @@ export default {
 
     return { range };
   },
+  subscriptions() {
+    this.$watchAsObservable('range').pipe(
+        debounce(() => timer(2000))
+    ).subscribe(res => {
+      this.getData();
+    })
+  },
   data() {
     return {
+      movementLoading: false,
+      demographicsLoading: false,
 
+      movementSummary: {
+        inbound: 0,
+        outbound: 0,
+        alerts: 0
+      },
+      genderStats: [0, 0],
+
+      ageStats: {
+        '10': 0,
+        '17': 0,
+        '40': 0,
+        '65': 0,
+        '65+': 0
+      },
+
+      transportStats: [
+        {name: 'Air',  data: [0]},
+        {name: 'Land',  data: [0]},
+        {name: 'Sea',  data: [0]}
+      ]
     }
   },
   methods: {
@@ -106,8 +121,45 @@ export default {
       // Todo, update location history. Remember there'll be other queries like border point, etc
       // window.history.pushState({}, document.title, window.location.href.split('?')[0] + `?start_date=${_startDate}&end_date=${_endDate}`);
       this.range = e;
+    },
+
+    async getData() {
+      this.movementLoading = true;
+      this.demographicsLoading = true;
+
+      const dates = buildStartEndDates(this.range);
+
+      // Get movement summary
+      let res = await this.axios.get(`/movement/summary?start_date=${dates[0]}&end_date=${dates[1]}`);
+      if (res && res.status === 200) {
+        this.movementSummary = {
+          inbound: formatNumber(res.data.Inbound),
+          outbound: formatNumber(res.data.Outbound),
+          alerts: formatNumber(res.data.Alerts),
+        };
+      }
+
+      this.movementLoading = false;
+
+      // Load transport statistics to catch
+      res = await this.axios.get(`/movement/demographics?start_date=${dates[0]}&end_date=${dates[1]}`);
+      if (res && res.status === 200) {
+        this.genderStats = res.data.gender;
+        this.transportStats = [
+          { name: 'Air', data: [res.data.transport.Air] },
+          { name: 'Land', data: [res.data.transport.Land ?? 0] },
+          { name: 'Sea', data: [res.data.transport.Sea ?? 0] },
+        ];
+        this.ageStats = res.data.age;
+      }
+
+      this.demographicsLoading = false;
     }
   },
+
+  mounted() {
+    this.getData();
+  }
 }
 </script>
 

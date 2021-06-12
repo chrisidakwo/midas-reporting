@@ -17,7 +17,7 @@
 
               <div class="flex align-items-center mt-auto" style="min-height: 2.25rem !important;">
                 <div class="d-flex flex-column">
-                  <div class="fw-semibold text-5xl tracking-tighter lh-sm">{{ inbound }}</div>
+                  <div class="fw-semibold text-5xl tracking-tighter lh-sm">{{ series.inbound }}</div>
                 </div>
               </div>
             </template>
@@ -37,7 +37,7 @@
 
               <div class="flex align-items-center mt-auto" style="min-height: 2.25rem !important;">
                 <div class="d-flex flex-column">
-                  <div class="fw-semibold text-5xl tracking-tighter lh-sm">{{ outbound }}</div>
+                  <div class="fw-semibold text-5xl tracking-tighter lh-sm">{{ series.outbound }}</div>
                 </div>
               </div>
             </template>
@@ -56,7 +56,7 @@
 
               <div class="flex align-items-center mt-auto" style="min-height: 2.25rem !important;">
                 <div class="d-flex flex-column">
-                  <div class="fw-semibold text-5xl tracking-tighter lh-sm">{{ alerted }}</div>
+                  <div class="fw-semibold text-5xl tracking-tighter lh-sm">{{ series.alerts }}</div>
                 </div>
               </div>
             </template>
@@ -69,65 +69,23 @@
 
 <script>
 import AppCard from '../Components/Card';
-import { timer } from "rxjs";
-import { debounce } from "rxjs/operators";
 import { formatNumber, buildStartEndDates } from '../utils/functions';
 
 export default {
   components: {AppCard},
-  props: ['range'],
-  subscriptions() {
-    this.$watchAsObservable('range').pipe(
-        debounce(() => timer(2000))
-    ).subscribe(res => {
-      this.getData();
-    })
-  },
-  data() {
-    return {
-      loading: false,
-      inboundCount: 0,
-      outboundCount: 0,
-      alertedCount: 0
-    }
-  },
-  methods: {
-    getData() {
-      this.loading = true;
-
-      const dates = buildStartEndDates(this.range);
-
-      this.axios.get(`/movement/summary?start_date=${dates[0]}&end_date=${dates[1]}`)
-          .then((res) => {
-            this.loading = false;
-
-            this.inboundCount = res.data.Inbound;
-            this.outboundCount = res.data.Outbound;
-            this.alertedCount = res.data.Alerts;
-          })
-      .catch((err) => {
-        this.loading = false;
-
-        const statusCode = err.response.status;
-        const errorMessage = err.response.statusText;
-      })
-    },
-  },
+  props: ['series', 'loading'],
   computed: {
     inbound() {
-      return formatNumber(this.inboundCount);
+      return formatNumber(this.series.inbound);
     },
 
     outbound() {
-      return formatNumber(this.outboundCount);
+      return formatNumber(this.series.outbound);
     },
 
     alerted() {
-      return formatNumber(this.alertedCount);
+      return formatNumber(this.series.alerts);
     }
-  },
-  mounted() {
-    this.getData();
   }
 }
 </script>

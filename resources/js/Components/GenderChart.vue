@@ -1,34 +1,36 @@
 <template>
-  <app-card class="p-4" :loading="loading">
+  <app-card class="p-4" :loading="loading" style="height: 25rem !important;">
     <template #default>
-      <div class="d-flex flex-column">
-        <div class="d-flex align-items-center justify-content-between">
-          <div class="fw-bold text-secondary text-uppercase tracking-wider" style="font-size: var(--midas-font-size-xs)">
-            Gender
+      <div class="d-flex flex-column flex-fill h-100">
+        <div class="d-flex flex-column">
+          <div class="mb-3 d-flex align-items-center justify-content-between">
+            <div class="fw-bold text-secondary text-uppercase tracking-wider" style="font-size: var(--midas-font-size-xs)">
+              Gender
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="d-flex flex-column p-4 flex-fill pb-6" style="min-height: 200px">
-        <apexchart type="donut" :series="dataSeries" :options="options" />
-      </div>
+        <div class="d-flex flex-column flex-fill pb-6">
+          <apexchart type="donut" height="190" :series="series" :options="options" />
+        </div>
 
-      <div class="d-flex flex-column justify-content-end fs-sm">
+        <div class="d-flex flex-column justify-content-end fs-sm">
         <div class="d-flex align-items-center justify-content-between py-3 border-bottom last:border-bottom"
-             v-for="(dataset, index) in dataSeries" :key="index">
+             v-for="(dataset, index) in series" :key="index">
           <div class="d-flex align-items-center w-1/3">
             <div class="flex-shrink-0 w-2 h-2 me-3 rounded-circle" :style="{ 'background-color': options.colors[index] }"></div>
             <div class="text-truncate">{{ labels[index] }}</div>
           </div>
 
           <div class="w-1/3 fw-medium text-right">
-            <span>{{ dataSeries[index] }}</span> travellers
+            <span>{{ format(series[index]) }}</span> travellers
           </div>
 
           <div class="w-1/3 text-right text-secondary">
             <span>{{ format((dataset / totalTravellers) * 100) }}</span>%
           </div>
         </div>
+      </div>
       </div>
     </template>
   </app-card>
@@ -42,19 +44,10 @@ import { formatNumber, buildStartEndDates } from '../utils/functions';
 
 export default {
   components: {AppCard},
-  props: ['range'],
-  subscriptions() {
-    this.$watchAsObservable('range').pipe(
-        debounce(() => timer(2000))
-    ).subscribe(res => {
-      this.getData();
-    })
-  },
+  props: ['series', 'loading'],
   data() {
     return {
-      loading: true,
       labels: ['Female', 'Male'],
-      dataSeries: [0, 0],
       options: {
         chart: {
           type: 'donut',
@@ -112,39 +105,17 @@ export default {
   },
   methods: {
     format(value) {
-      if (isNaN(value)) { value = 0; }
-
-      return formatNumber(value, 'Us', {
+      return formatNumber(value, 'US', {
         maximumFractionDigits: 2
       });
     },
-
-    getData() {
-      this.loading = true;
-
-      const dates = buildStartEndDates(this.range);
-
-      this.axios.get(`/movement/demographics/gender?start_date=${dates[0]}&end_date=${dates[1]}`)
-      .then((res) => {
-        this.loading = false;
-
-        this.dataSeries = res.data;
-      })
-      .catch((err) => {
-        this.loading = false;
-      })
-    }
   },
 
   computed: {
     totalTravellers() {
-      return this.dataSeries.reduce((a, b) => a + b, 0);
+      return this.series.reduce((a, b) => a + b, 0);
     }
   },
-
-  mounted() {
-    this.getData();
-  }
 }
 </script>
 

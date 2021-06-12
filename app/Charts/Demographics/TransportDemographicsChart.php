@@ -18,28 +18,28 @@ class TransportDemographicsChart extends Chart {
 	}
 
 	public function handler(Request $request): Chartisan {
-		[$start, $end] = getDefaultStartEndDates();
-
-		$travellers = $this->dataRepository->getTravellersReportStatistics($start, $end);
-
-		$data = collect($travellers)->groupBy('TransportType')->map(static function ($value) {
-			return count($value);
-		})->reduce(function (&$carry, $value, $key) {
-			// Get the group for the said type
-			$group = TransportTypes::TYPE_GROUP[$key];
-
-			if (array_key_exists($group, $carry)) {
-				$carry[$group] += $value;
-			} else {
-				$carry[$group] = $value;
-			}
-
-			return $carry;
-		}, []);
+//		[$start, $end] = getDefaultStartEndDates();
+//
+//		$travellers = $this->dataRepository->getTravellersReportStatistics($start, $end);
+//
+//		$data = collect($travellers)->groupBy('TransportType')->map(static function ($value) {
+//			return count($value);
+//		})->reduce(function (&$carry, $value, $key) {
+//			// Get the group for the said type
+//			$group = TransportTypes::TYPE_GROUP[$key];
+//
+//			if (array_key_exists($group, $carry)) {
+//				$carry[$group] += $value;
+//			} else {
+//				$carry[$group] = $value;
+//			}
+//
+//			return $carry;
+//		}, []);
 
 		return Chartisan::build()
 			->labels(TransportTypes::GROUPS)
-			->dataset('Transportation Mode', array_values(array_merge($data, [
+			->dataset('Transportation Mode', array_values(array_merge([], [
 				'Sea' => 12790,
 				'Land' => 23180
 			])));
