@@ -19,7 +19,7 @@
         </div>
 
         <div class="d-flex flex-column justify-content-end fs-sm">
-          <div class="d-flex align-items-center justify-content-between py-3 border-bottom last:border-bottom"
+          <div class="d-flex align-items-center justify-content-between py-75 border-bottom last:border-bottom"
                v-for="(dataset, index) in series" :key="index">
             <div class="d-flex align-items-center w-1/3">
               <div class="flex-shrink-0 w-2 h-2 me-3 rounded-circle" :style="{ 'background-color': options.colors[index] }"></div>
@@ -77,7 +77,7 @@ export default {
             horizontal: true
           }
         },
-        series: this.series,
+        // series: this.series,
         states: {
           hover: {
             filter: {
@@ -91,12 +91,12 @@ export default {
             show: false
           },
           custom: ({ seriesIndex, w }) => {
-            const percentage = this.format((this.series[seriesIndex]['data'][0] / this.totalTravellers) * 100)
+            const value = this.format(this.series[seriesIndex]['data'][0]);
 
             return `<div class="d-flex align-items-center h-8 min-h-8 max-h-8 px-3">
                       <div class="w-3 h-3 rounded-full" style="background-color: ${w.config.colors[seriesIndex]};"></div>
                       <div class="ml-2 text-md leading-none">${w.config.series[seriesIndex].name}:</div>
-                      <div class="ml-2 text-md font-bold leading-none">${percentage}%</div>
+                      <div class="ml-2 text-md fw-bold leading-none">${value}</div>
                   </div>`;
           }
         },
@@ -125,7 +125,7 @@ export default {
     },
 
     highestMode() {
-      return this.series.sort((a, b) => {
+      return [...this.series].sort((a, b) => {
         return a.data[0] > b.data[0];
       })[this.series.length - 1].name;
     }

@@ -40,16 +40,16 @@
       <div class="col-12">
         <div class="px-4">
           <div class="row">
-            <div class="col mb-4">
+            <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
               <gender-chart :series="genderStats" :loading="demographicsLoading" />
             </div>
 
-            <div class="col mb-4">
+            <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
               <transport-mode-chart :series="transportStats" :loading="demographicsLoading" />
             </div>
 
-            <div class="col mb-4">
-              <age-group-chart :series="ageStats" />
+            <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
+              <age-group-chart :series="ageStats" :loading="demographicsLoading" />
             </div>
           </div>
         </div>
@@ -101,13 +101,13 @@ export default {
       },
       genderStats: [0, 0],
 
-      ageStats: {
-        '10': 0,
-        '17': 0,
-        '40': 0,
-        '65': 0,
-        '65+': 0
-      },
+      ageStats: [
+        { name: 'Under 10', data: [0]},
+        { name: '11 to 17', data: [0]},
+        { name: '18 to 40', data: [0]},
+        { name: '41 to 65', data: [0]},
+        { name: 'Above 65', data: [0]}
+      ],
 
       transportStats: [
         {name: 'Air',  data: [0]},
@@ -144,13 +144,24 @@ export default {
       // Load transport statistics to catch
       res = await this.axios.get(`/movement/demographics?start_date=${dates[0]}&end_date=${dates[1]}`);
       if (res && res.status === 200) {
+        // Gender
         this.genderStats = res.data.gender;
+
+        // Transport Mode
         this.transportStats = [
           { name: 'Air', data: [res.data.transport.Air] },
           { name: 'Land', data: [res.data.transport.Land ?? 0] },
           { name: 'Sea', data: [res.data.transport.Sea ?? 0] },
         ];
-        this.ageStats = res.data.age;
+
+        // Age
+        this.ageStats = [
+          { name: 'Under 10', data: [res.data.age['10']]},
+          { name: '11 to 17', data: [res.data.age['17']]},
+          { name: '18 to 40', data: [res.data.age['40']]},
+          { name: '41 to 65', data: [res.data.age['65']]},
+          { name: 'Above 65', data: [res.data.age['65+']]}
+        ];
       }
 
       this.demographicsLoading = false;
