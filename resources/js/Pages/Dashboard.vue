@@ -86,6 +86,14 @@ export default {
     this.$watchAsObservable('range').pipe(
         debounce(() => timer(2000))
     ).subscribe(res => {
+      const dates = buildStartEndDates(res.newValue);
+
+      const query = new URLSearchParams(window.location.search);
+      query.set('start_date', dates[0]);
+      query.set('end_date', dates[1]);
+
+      window.history.pushState({}, document.title, window.location.href.split('?')[0] + '?' + query.toString());
+
       this.getData();
     })
   },
@@ -118,8 +126,6 @@ export default {
   },
   methods: {
     dateUpdated(e) {
-      // Todo, update location history. Remember there'll be other queries like border point, etc
-      // window.history.pushState({}, document.title, window.location.href.split('?')[0] + `?start_date=${_startDate}&end_date=${_endDate}`);
       this.range = e;
     },
 
