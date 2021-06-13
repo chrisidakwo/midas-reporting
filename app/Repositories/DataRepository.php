@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 interface DataRepository {
 	/**
@@ -34,4 +35,10 @@ interface DataRepository {
 	 * @return array
 	 */
 	public function getTravellersReportStatistics(Carbon $startDate, Carbon $endDate, int $borderPoint = null): array;
+
+	/**
+	 * @param array $filters
+	 * @return Collection
+	 */
+	public function getBorderPoints(array $filters = []): Collection;
 }

@@ -3,7 +3,7 @@
 namespace App\Enums;
 
 class TransportTypes {
-	public const TYPES = ['Flight', 'Bus', 'Car', 'Ship', 'Truck'];
+	public const TYPES = ['Flight', 'Bus', 'Car', 'Ship', 'Truck', 'Pedestrian', 'Motorcycle', 'Lorry'];
 
 	public const GROUPS = ['Air', 'Land', 'Sea'];
 
@@ -12,6 +12,9 @@ class TransportTypes {
 		'Car' => 'Land',
 		'Flight' => 'Air',
 		'Ship' => 'Sea',
-		'Truck' => 'Land'
+		'Truck' => 'Land',
+		'Pedestrian' => 'Land',
+		'Motorcycle' => 'Land',
+		'Lorry' => 'Land'
 	];
 }

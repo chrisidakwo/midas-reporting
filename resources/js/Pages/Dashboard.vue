@@ -34,11 +34,7 @@
               Demographic properties and general statistical characteristics of travellers and movements
             </div>
           </div>
-        </div>
-      </div>
 
-      <div class="col-12">
-        <div class="px-4">
           <div class="row">
             <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
               <gender-chart :series="genderStats" :loading="demographicsLoading" />
@@ -52,6 +48,14 @@
               <age-group-chart :series="ageStats" :loading="demographicsLoading" />
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="px-4">
+          <traffic-chart :series="trafficSeries" :states="trafficStates" :loading="trafficLoading" />
         </div>
       </div>
     </div>
@@ -69,9 +73,10 @@ import AgeGroupChart from "../Components/AgeGroupChart";
 import { formatNumber, buildStartEndDates } from '../utils/functions';
 import { timer } from 'rxjs';
 import { debounce } from 'rxjs/operators';
+import TrafficChart from "../Components/TrafficChart";
 
 export default {
-  components: {AgeGroupChart, TransportModeChart, GenderChart, MovementStatistics, AppLayout, AppCard},
+  components: {TrafficChart, AgeGroupChart, TransportModeChart, GenderChart, MovementStatistics, AppLayout, AppCard},
   props: ['startDate', 'endDate'],
 
   setup(props) {
@@ -101,6 +106,7 @@ export default {
     return {
       movementLoading: false,
       demographicsLoading: false,
+      trafficLoading: false,
 
       movementSummary: {
         inbound: 0,
@@ -121,7 +127,10 @@ export default {
         {name: 'Air',  data: [0]},
         {name: 'Land',  data: [0]},
         {name: 'Sea',  data: [0]}
-      ]
+      ],
+
+      trafficSeries: [],
+      trafficStates: []
     }
   },
   methods: {
@@ -132,12 +141,13 @@ export default {
     async getData() {
       this.movementLoading = true;
       this.demographicsLoading = true;
+      this.trafficLoading = true;
 
       const dates = buildStartEndDates(this.range);
 
       // Get movement summary
       let res = await this.axios.get(`/movement/summary?start_date=${dates[0]}&end_date=${dates[1]}`);
-      if (res && res.status === 200) {
+      if (res && res.status == 200) {
         this.movementSummary = {
           inbound: formatNumber(res.data.Inbound),
           outbound: formatNumber(res.data.Outbound),
@@ -171,6 +181,16 @@ export default {
       }
 
       this.demographicsLoading = false;
+
+
+      // Get traffic data
+      res = await this.axios.get(`/movement/traffic?start_date=${dates[0]}&end_date=${dates[1]}`);
+      if (res && res.status == 200) {
+        this.series = res.data.traffic;
+        this.states = res.data.states;
+      }
+
+      this.trafficLoading = false;
     }
   },
 

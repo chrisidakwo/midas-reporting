@@ -24,6 +24,8 @@ Route::domain(config('app.domain'))->group(function () {
 		Route::get('/', [MovementController::class, 'index'])->name('index');
 		Route::get('/summary', [MovementController::class, 'getSummary'])->name('summary');
 
+		Route::get('/traffic', [MovementController::class, 'trafficByState']);
+
 		Route::group(['prefix' => 'demographics'], static function () {
 			Route::get('/', [MovementController::class, 'demographics'])->name('demographics');
 		});
