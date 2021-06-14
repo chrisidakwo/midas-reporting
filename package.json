@@ -32,6 +32,7 @@
         "@inertiajs/inertia-vue3": "^0.4.7",
         "@inertiajs/progress": "^0.2.5",
         "@nopr3d/vue-next-rx": "^1.0.7",
+        "@suadelabs/vue3-multiselect": "^1.0.1",
         "apexcharts": "^3.27.1",
         "countup.js": "^2.0.7",
         "material-icons": "^0.6.2",

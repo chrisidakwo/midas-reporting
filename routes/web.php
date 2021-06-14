@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 Route::domain(config('app.domain'))->group(function () {
 	Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 	Route::get('/reports', [ReportController::class, 'index'])->name('reports');
+	Route::get('/border-points', [DashboardController::class, 'borderPoints'])->name('border_points');
 
 	Route::group(['prefix' => 'movement', 'as' => 'movement.'], static function () {
 		Route::get('/', [MovementController::class, 'index'])->name('index');

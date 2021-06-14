@@ -13,11 +13,11 @@ class DataService implements DataRepository {
 	 * @inheritDoc
 	 */
 	public function getMovementSummary(Carbon $startDate, Carbon $endDate, int $borderPoint = null): array {
-		$cacheKey = "movement_$startDate$endDate";
+		$cacheKey = "movement_$startDate$endDate$borderPoint";
 		$ttl = setCacheTTL($startDate, $endDate);
 
-		$movementSummary = Cache::remember($cacheKey, $ttl, static function () use ($startDate, $endDate) {
-			return DB::select("EXEC GetMovementStatistics @PeriodStart='$startDate', @PeriodEnd='$endDate', @RegionID=NULL, @borderPoint=NULL");
+		$movementSummary = Cache::remember($cacheKey, $ttl, static function () use ($startDate, $endDate, $borderPoint) {
+			return DB::select("EXEC GetMovementStatistics @PeriodStart='$startDate', @PeriodEnd='$endDate', @RegionID=NULL, " . ($borderPoint ? "@BorderPoint='$borderPoint'" : "@BorderPoint=NULL"));
 		});
 
 		if (!empty($movementSummary)) {
@@ -48,7 +48,7 @@ class DataService implements DataRepository {
 	 * @inheritDoc
 	 */
 	public function getDoubtablePersons(Carbon $startDate, Carbon $endDate, int $borderPoint = null): array {
-		$cacheKey = "doubtable_$startDate$endDate";
+		$cacheKey = "doubtable_$startDate$endDate$borderPoint";
 		$ttl = setCacheTTL($startDate, $endDate);
 
 		return Cache::remember($cacheKey, $ttl, static function () use ($startDate, $endDate, $borderPoint) {
@@ -60,7 +60,7 @@ class DataService implements DataRepository {
 	 * @inheritDoc
 	 */
 	public function getTravellersReportStatistics(Carbon $startDate, Carbon $endDate, int $borderPoint = null): array {
-		$cacheKey = "travellers_report_$startDate$endDate";
+		$cacheKey = "travellers_report_$startDate$endDate$borderPoint";
 		$ttl = setCacheTTL($startDate, $endDate);
 
 		return Cache::remember($cacheKey, $ttl, static function () use ($startDate, $endDate, $borderPoint) {

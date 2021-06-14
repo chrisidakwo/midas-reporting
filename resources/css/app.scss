@@ -220,6 +220,11 @@ input[disabled] {
   -moz-osx-font-smoothing: auto;
 }
 
+.form-control {
+  min-height: 40px !important;
+  height: 40px !important;
+}
+
 .fs-sm {
   font-size: $font-size-xs !important;
 }

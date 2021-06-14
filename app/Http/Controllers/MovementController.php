@@ -39,6 +39,9 @@ class MovementController extends Controller {
 		[$start, $end] = getDefaultStartEndDates($request);
 
 		$borderPoint = $request->get('border');
+		if ($borderPoint === 'null') {
+			$borderPoint = null;
+		}
 
 		$movementSummary = $this->dataRepository->getMovementSummary($start, $end, $borderPoint);
 
@@ -53,6 +56,9 @@ class MovementController extends Controller {
 		[$start, $end] = getDefaultStartEndDates();
 
 		$borderPoint = $request->get('border');
+		if ($borderPoint === 'null') {
+			$borderPoint = null;
+		}
 
 		$travellers = $this->dataRepository->getTravellersReportStatistics($start, $end, $borderPoint);
 

@@ -9,7 +9,7 @@
             </div>
           </div>
 
-          <div class="mt-6 font-semibold text-2xl leading-tight">
+          <div class="mt-6 font-semibold text-2xl leading-tight" v-if="!loading">
             <span style="color: #dd6c20;">{{ highestAge }}</span> years travelled the most
           </div>
         </div>

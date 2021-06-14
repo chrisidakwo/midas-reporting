@@ -9,7 +9,7 @@
             </div>
           </div>
 
-          <div class="mt-6 font-semibold text-2xl leading-tight">
+          <div class="mt-6 font-semibold text-2xl leading-tight" v-if="!loading">
             <span style="color: #5b92e5;">{{ highestMode }}</span> is the most used transportation mode
           </div>
         </div>
