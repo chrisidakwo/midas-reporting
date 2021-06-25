@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\BCPController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InsightController;
 use App\Http\Controllers\MovementController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\VisaController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,6 +21,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::domain(config('app.domain'))->group(function () {
 	Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+	Route::get('/bcp-records', [BCPController::class, 'index'])->name('bcp.records');
+	Route::get('/visas', [VisaController::class, 'index'])->name('visas');
+	Route::get('/insights', [InsightController::class, 'index'])->name('insights');
 	Route::get('/reports', [ReportController::class, 'index'])->name('reports');
 	Route::get('/border-points', [DashboardController::class, 'borderPoints'])->name('border_points');
 
@@ -28,7 +34,7 @@ Route::domain(config('app.domain'))->group(function () {
 		Route::get('/traffic', [MovementController::class, 'trafficByState']);
 
 		Route::group(['prefix' => 'demographics'], static function () {
-			Route::get('/', [MovementController::class, 'demographics'])->name('demographics');
+			Route::get('/{type}', [MovementController::class, 'demographics'])->name('demographics');
 		});
 	});
 });

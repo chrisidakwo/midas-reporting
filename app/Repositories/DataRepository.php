@@ -22,9 +22,9 @@ interface DataRepository {
 	 * @param Carbon $startDate
 	 * @param Carbon $endDate
 	 * @param int|null $borderPoint
-	 * @return array
+	 * @return Collection
 	 */
-	public function getDoubtablePersons(Carbon $startDate, Carbon $endDate, int $borderPoint = null): array;
+	public function getDoubtablePersons(Carbon $startDate, Carbon $endDate, int $borderPoint = null): Collection;
 
 	/**
 	 * Get a full report of travellers (including personal and border data) within the provided start and end dates.
@@ -32,9 +32,8 @@ interface DataRepository {
 	 * @param Carbon $startDate
 	 * @param Carbon $endDate
 	 * @param int|null $borderPoint
-	 * @return array
 	 */
-	public function getTravellersReportStatistics(Carbon $startDate, Carbon $endDate, int $borderPoint = null): array;
+	public function getTravellersReportStatistics(Carbon $startDate, Carbon $endDate, int $borderPoint = null);
 
 	/**
 	 * @param array $filters

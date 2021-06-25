@@ -7,7 +7,7 @@
         </div>
 
         <div class="d-flex flex-fill align-items-center">
-          <apexchart type="bar" :series="series" :options="chartOptions" />
+          <apexchart type="bar" :series="series" :options="chartOptions"/>
         </div>
       </div>
     </template>
@@ -20,6 +20,29 @@ import AppCard from '../Components/Card';
 export default {
   components: {AppCard},
   props: ['series', 'states', 'loading'],
+  subscriptions() {
+    this.$watchAsObservable('series').subscribe(res => {
+      const newSeries = res.newValue;
+
+      this.chartOptions = {
+        ...this.chartOptions, ...{
+          series: newSeries
+        }
+      }
+    })
+
+    this.$watchAsObservable('states').subscribe(res => {
+      const states = res.newValue;
+
+      this.chartOptions = {
+        ...this.chartOptions, ...{
+          xaxis: {
+            categories: states
+          }
+        }
+      }
+    })
+  },
   data() {
     return {
       selectedStates: [],

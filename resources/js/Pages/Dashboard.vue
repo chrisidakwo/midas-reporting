@@ -32,21 +32,15 @@
                 </div>
               </div>
 
-              <div class="col" style="z-index: 9999">
+              <div class="col">
                 <div class="p-4">
-                  <label>Border Point</label>
-                  <multiselect v-model="selectedBorderPoints" :options="borderPoints" label="Name" track-by="OwnerID"
-                               placeholder="Type to search" open-direction="bottom" :searchable="true"
-                               :close-on-select="false" :clear-on-select="false" :preserve-search="true"
-                               :hide-selected="true" :limit="3" :limit-text="limitSelection"
-                               :loading="borderSearching">
-
-                    <template slot="clear" slot-scope="props">
-                      <div class="multiselect__clear" v-if="selectedBorderPoints.length"
-                           @mousedown.prevent.stop="clearAll(props.search)"></div>
-                    </template>
-                    <span slot="noResult">No border point found</span>
-                  </multiselect>
+                  <label for="ddlState">State</label>
+                  <select name="state" id="ddlState" v-model="selectedState" class="form-control">
+                    <option value="null" selected>Select a state</option>
+                    <option :value="state.OwnerID" v-for="(state, index) in states" :key="index">
+                      {{ state.Name }}
+                    </option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -63,7 +57,7 @@
       </div>
     </div>
 
-    <movement-statistics :series="movementSummary" :loading="movementLoading"/>
+    <movement-count :series="movementSummary" :loading="movementLoading"/>
 
     <div class="row mb-4">
       <div class="col-12">
@@ -77,15 +71,30 @@
 
           <div class="row">
             <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
-              <gender-chart :series="genderStats" :loading="demographicsLoading"/>
+              <gender-chart @directionUpdate="updateGenderDirection" :direction="genderDirection" :series="genderStats"
+                            :loading="genderDemographicsLoading"/>
             </div>
 
             <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
-              <transport-mode-chart :series="transportStats" :loading="demographicsLoading"/>
+              <transport-mode-chart @directionUpdate="updateTransportDirection" :series="transportStats"
+                                    :direction="transportModeDirection"
+                                    :loading="transportModeDemographicsLoading"/>
             </div>
 
             <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
-              <age-group-chart :series="ageStats" :loading="demographicsLoading"/>
+              <age-group-chart @directionUpdate="updateAgeDirection" :series="ageStats"
+                               :direction="ageDirection"
+                               :loading="ageGroupDemographicsLoading"/>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12 col-lg-6 mb-4">
+              <geo-chart title="Travel Destinations" :series="destinationsStat" :loading="destinationsLoading" :resizeDebounce="500" />
+            </div>
+
+            <div class="col-md-12 col-lg-6 mb-4">
+              <geo-chart title="Nationalities Entering Nigeria" :series="nationalitiesStat" :loading="nationalitiesLoading" :resizeDebounce="500" />
             </div>
           </div>
         </div>
@@ -106,26 +115,28 @@
 import AppLayout from "../Layouts/AppLayout";
 import AppCard from '../Components/Card';
 import {ref} from 'vue';
-import MovementStatistics from "../Components/MovementStatistics";
+import MovementCount from "../Components/MovementCount";
 import GenderChart from "../Components/GenderChart";
 import TransportModeChart from "../Components/TransportModeChart";
 import AgeGroupChart from "../Components/AgeGroupChart";
 import {formatNumber, buildStartEndDates} from '../utils/functions';
 import TrafficChart from "../Components/TrafficChart";
 import Multiselect from '@suadelabs/vue3-multiselect';
+import GeoChart from "../Components/GeoChart";
 
 export default {
   components: {
+    GeoChart,
     TrafficChart,
     AgeGroupChart,
     TransportModeChart,
     GenderChart,
-    MovementStatistics,
+    MovementCount,
     AppLayout,
     AppCard,
     Multiselect
   },
-  props: ['startDate', 'endDate', 'borderPoints'],
+  props: ['startDate', 'endDate', 'states', 'selectedState'],
 
   setup(props) {
     const range = ref({
@@ -137,17 +148,29 @@ export default {
   },
   data() {
     return {
+      // Loaders
       movementLoading: false,
-      demographicsLoading: false,
+      genderDemographicsLoading: false,
+      ageGroupDemographicsLoading: false,
+      transportModeDemographicsLoading: false,
       trafficLoading: false,
+      destinationsLoading: false,
+      nationalitiesLoading: false,
 
-      selectedBorderPoints: [],
-      borderSearching: false,
+      // Flag variables
+      selectedState: null,
 
+      // Directions
+      genderDirection: 'entry',
+      transportModeDirection: 'entry',
+      ageDirection: 'entry',
+
+      // Data variables
       movementSummary: {
         inbound: 0,
         outbound: 0,
-        alerts: 0
+        alerts: 0,
+        denied: 0
       },
       genderStats: [0, 0],
 
@@ -166,7 +189,10 @@ export default {
       ],
 
       trafficSeries: [],
-      trafficStates: []
+      trafficStates: [],
+
+      destinationsStat: [],
+      nationalitiesStat: []
     }
   },
   methods: {
@@ -175,26 +201,126 @@ export default {
     },
 
     clearAll() {
-      this.selectedBorderPoints = [];
+      this.selectedState = null;
     },
 
-    limitSelection(count) {
-      return `and ${count} other border points`
+    updateGenderDirection(direction) {
+      if (direction !== this.genderDirection) {
+        this.genderDirection = direction;
+
+        this.genderDemographicsLoading = true;
+
+        // Get selected date range
+        const dates = buildStartEndDates(this.range);
+
+        // Retrieve data for gender based on new direction
+        this.getGenderDemographicData(dates);
+
+        this.genderDemographicsLoading = false;
+      }
     },
 
-    async findBorderPoint(query) {
-      this.borderSearching = true;
+    updateTransportDirection(direction) {
+      if (direction !== this.transportModeDirection) {
+        this.transportModeDirection = direction;
 
-      const res = await this.axios.get(`/border-points?search=${query}`);
-      this.borderPoints = res.data;
+        // Get selected date range
+        const dates = buildStartEndDates(this.range);
 
-      this.borderSearching = false;
+        this.transportModeDemographicsLoading = true;
+
+        // Retrieve data for demographics based on new direction
+        this.getTransportModeDemographicData(dates);
+
+        this.transportModeDemographicsLoading = false;
+      }
+    },
+
+    updateAgeDirection(direction) {
+      if (direction !== this.ageDirection) {
+        this.ageDirection = direction;
+
+        // Get selected date range
+        const dates = buildStartEndDates(this.range);
+
+        this.ageDemographicsLoading = true;
+
+        // Retrieve data for demographics based on new direction
+        this.getAgeGroupDemographicData(dates);
+
+        this.ageDemographicsLoading = false;
+      }
+    },
+
+    async getGenderDemographicData(dates) {
+      // Load gender statistics
+      const res = await this.axios.get(`/movement/demographics/gender?start_date=${dates[0]}&end_date=${dates[1]}&direction=${this.genderDirection}`);
+      if (res && res.status === 200) {
+        this.genderStats = res.data;
+      }
+    },
+
+    async getTransportModeDemographicData(dates) {
+      // Load transport statistics to catch
+      const res = await this.axios.get(`/movement/demographics/transport_mode?start_date=${dates[0]}&end_date=${dates[1]}&direction=${this.transportModeDirection}`);
+      if (res && res.status === 200) {
+        this.transportStats = [
+          {name: 'Air', data: [res.data.Air]},
+          {name: 'Land', data: [res.data.Land ?? 0]},
+          {name: 'Sea', data: [res.data.Sea ?? 0]},
+        ];
+      }
+    },
+
+    async getAgeGroupDemographicData(dates) {
+      // Load transport statistics to catch
+      const res = await this.axios.get(`/movement/demographics/age?start_date=${dates[0]}&end_date=${dates[1]}&direction=${this.ageDirection}`);
+      if (res && res.status === 200) {
+        this.ageStats = [
+          {name: 'Under 10', data: [res.data['10']]},
+          {name: '11 to 17', data: [res.data['17']]},
+          {name: '18 to 40', data: [res.data['40']]},
+          {name: '41 to 65', data: [res.data['65']]},
+          {name: 'Above 65', data: [res.data['65+']]}
+        ];
+      }
+    },
+
+    async getTravelDestinationDemographicData(dates) {
+      // Load transport statistics to catch
+      const res = await this.axios.get(`/movement/demographics/destination?start_date=${dates[0]}&end_date=${dates[1]}&direction=exit`);
+      if (res && res.status === 200) {
+        this.destinationsStat = res.data;
+      }
+    },
+
+    async getMovementSummaryData(dates) {
+      let res = await this.axios.get(`/movement/summary?start_date=${dates[0]}&end_date=${dates[1]}`);
+      if (res && res.status == 200) {
+        this.movementSummary = {
+          inbound: formatNumber(res.data.Inbound),
+          outbound: formatNumber(res.data.Outbound),
+          alerts: formatNumber(res.data.Alerts),
+          denied: formatNumber(res.data.Denied)
+        };
+      }
+    },
+
+    async getTrafficData(dates) {
+      const res = await this.axios.get(`/movement/traffic?start_date=${dates[0]}&end_date=${dates[1]}`);
+      if (res && res.status == 200) {
+        this.trafficSeries = res.data.traffic;
+        this.trafficStates = res.data.states;
+      }
     },
 
     async getData() {
       this.movementLoading = true;
-      this.demographicsLoading = true;
+      this.genderDemographicsLoading = true;
+      this.ageGroupDemographicsLoading = true;
+      this.transportModeDemographicsLoading = true;
       this.trafficLoading = true;
+      this.destinationsLoading = true;
 
       // Get selected date range
       const dates = buildStartEndDates(this.range);
@@ -203,64 +329,37 @@ export default {
       query.set('start_date', dates[0]);
       query.set('end_date', dates[1]);
 
-      // Get selected border points
-      const borderPoint = this.selectedBorderPoints['OwnerID'] ?? query.get('border') ?? null;
-      query.delete('border');
-      if (borderPoint) {
-        query.set('border', borderPoint);
+      // Get selected state
+      const state = this.selectedState ?? query.get('state') ?? null;
+      query.delete('state');
+      if (state) {
+        query.set('state', state);
       }
-
-      console.log('Query', query.toString());
-      console.log('Border Points', borderPoint);
 
       history.pushState({}, document.title, window.location.href.split('?')[0] + '?' + query.toString());
 
       // Get movement summary
-      let res = await this.axios.get(`/movement/summary?start_date=${dates[0]}&end_date=${dates[1]}&border=${borderPoint}`);
-      if (res && res.status == 200) {
-        this.movementSummary = {
-          inbound: formatNumber(res.data.Inbound),
-          outbound: formatNumber(res.data.Outbound),
-          alerts: formatNumber(res.data.Alerts),
-        };
-      }
-
+      await this.getMovementSummaryData(dates);
       this.movementLoading = false;
 
-      // Load transport statistics to catch
-      res = await this.axios.get(`/movement/demographics?start_date=${dates[0]}&end_date=${dates[1]}&border=${borderPoint}`);
-      if (res && res.status === 200) {
-        // Gender
-        this.genderStats = res.data.gender;
+      // Get gender demographics data
+      await this.getGenderDemographicData(dates);
+      this.genderDemographicsLoading = false;
 
-        // Transport Mode
-        this.transportStats = [
-          {name: 'Air', data: [res.data.transport.Air]},
-          {name: 'Land', data: [res.data.transport.Land ?? 0]},
-          {name: 'Sea', data: [res.data.transport.Sea ?? 0]},
-        ];
+      // Get transport mode demographics data
+      await this.getTransportModeDemographicData(dates);
+      this.transportModeDemographicsLoading = false;
 
-        // Age
-        this.ageStats = [
-          {name: 'Under 10', data: [res.data.age['10']]},
-          {name: '11 to 17', data: [res.data.age['17']]},
-          {name: '18 to 40', data: [res.data.age['40']]},
-          {name: '41 to 65', data: [res.data.age['65']]},
-          {name: 'Above 65', data: [res.data.age['65+']]}
-        ];
-      }
+      // Get age demographics data
+      await this.getAgeGroupDemographicData(dates);
+      this.ageGroupDemographicsLoading = false;
 
-      this.demographicsLoading = false;
-
+      await this.getTravelDestinationDemographicData(dates);
+      this.destinationsLoading = false;
 
       // Get traffic data
-      res = await this.axios.get(`/movement/traffic?start_date=${dates[0]}&end_date=${dates[1]}&border=${borderPoint}`);
-      if (res && res.status == 200) {
-        this.series = res.data.traffic;
-        this.states = res.data.states;
-      }
-
-      this.trafficLoading = false;
+      // await this.getTrafficData(dates);
+      // this.trafficLoading = false;
     }
   },
 
@@ -291,5 +390,9 @@ export default {
 
 .multiselect, .multiselect__input, .multiselect__single {
   font-size: 14px !important;
+}
+
+.multiselect__tags, .multiselect__content-wrapper {
+  border: 1px solid #97A6BA !important;
 }
 </style>

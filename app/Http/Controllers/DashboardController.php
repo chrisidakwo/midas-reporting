@@ -24,9 +24,11 @@ class DashboardController extends Controller {
 	public function index(Request $request): Inertia\Response {
 		[$startDate, $endDate] = getDefaultStartEndDates();
 
-		$borderPoints = $this->dataRepository->getBorderPoints();
+		$selectedState = $request->get('state');
 
-		return Inertia::render('Dashboard', compact('startDate', 'endDate', 'borderPoints'));
+		$states = (object) [];
+
+		return Inertia::render('Dashboard', compact('startDate', 'endDate', 'states', 'selectedState'));
 	}
 
 	/**

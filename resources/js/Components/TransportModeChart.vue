@@ -7,6 +7,11 @@
             <div class="fw-bold text-secondary text-uppercase tracking-wider" style="font-size: var(--midas-font-size-xs)">
               Transportation Mode
             </div>
+
+            <div class="actions">
+              <button @click="updateDirection('entry')" class="px-3 py-1 mr-2 fs-sm" :class="{'bg-dark text-white rounded': transportDirection === 'entry'}">Entry</button>
+              <button @click="updateDirection('exit')" class="px-3 py-1 fs-sm" :class="{'bg-dark text-white rounded': transportDirection === 'exit'}">Exit</button>
+            </div>
           </div>
 
           <div class="mt-6 font-semibold text-2xl leading-tight" v-if="!loading">
@@ -42,16 +47,15 @@
 
 <script>
 import AppCard from '../Components/Card';
-import { timer } from "rxjs";
-import { debounce } from "rxjs/operators";
-import { formatNumber, buildStartEndDates } from '../utils/functions';
-import {toRefs} from "vue";
+import { formatNumber } from '../utils/functions';
 
 export default {
   components: {AppCard},
-  props: ['loading', 'series'],
+  props: ['loading', 'series', 'direction'],
+  emits: ['directionUpdate'],
   data() {
     return {
+      transportDirection: 'entry',
       options: {
         chart: {
           type: 'bar',
@@ -115,8 +119,16 @@ export default {
         maximumFractionDigits: 2
       });
     },
-  },
 
+    updateDirection(direction) {
+      this.transportDirection = direction;
+
+      this.$emit('directionUpdate', direction);
+    }
+  },
+  created() {
+    this.transportDirection = this.direction;
+  },
   computed: {
     totalTravellers() {
       return this.series.reduce((a, b) => {

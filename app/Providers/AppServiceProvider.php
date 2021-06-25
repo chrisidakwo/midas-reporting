@@ -32,20 +32,10 @@ class AppServiceProvider extends ServiceProvider {
 	 * @return void
 	 */
 	public function boot(Charts $charts) {
-		Livewire::component('movement-statistics', MovementStatisticsComponent::class);
-		Livewire::component('date-selector', DateSelectorComponent::class);
-
 		// Replace default migrate:fresh command class
 		$this->app->bind(FreshCommand::class, MigrateFreshCommand::class);
 
 		// Bind repositories to services
 		$this->app->bind(DataRepository::class, DataService::class);
-
-		// Register charts
-		$charts->register([
-			GenderDemographicsChart::class,
-			AgeDemographicsChart::class,
-			TransportDemographicsChart::class
-		]);
 	}
 }

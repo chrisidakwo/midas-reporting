@@ -7,6 +7,11 @@
             <div class="fw-bold text-secondary text-uppercase tracking-wider" style="font-size: var(--midas-font-size-xs)">
               Age Group
             </div>
+
+            <div class="actions">
+              <button @click="updateDirection('entry')" class="px-3 py-1 mr-2 fs-sm" :class="{'bg-dark text-white rounded': ageDirection === 'entry'}">Entry</button>
+              <button @click="updateDirection('exit')" class="px-3 py-1 fs-sm" :class="{'bg-dark text-white rounded': ageDirection === 'exit'}">Exit</button>
+            </div>
           </div>
 
           <div class="mt-6 font-semibold text-2xl leading-tight" v-if="!loading">
@@ -47,9 +52,11 @@ import { formatNumber } from '../utils/functions';
 
 export default {
   components: {AppCard},
-  props: ['series', 'loading'],
+  props: ['series', 'loading', 'direction'],
+  emits: ['directionUpdate'],
   data() {
     return {
+      ageDirection: 'entry',
       options: {
         chart: {
           type: 'bar',
@@ -124,8 +131,16 @@ export default {
       return formatNumber(value, 'US', {
         maximumFractionDigits: 2
       });
+    },
+    updateDirection(direction) {
+      this.ageDirection = direction;
+
+      this.$emit('directionUpdate', direction);
     }
-  }
+  },
+  created() {
+    this.ageDirection = this.direction;
+  },
 }
 </script>
 

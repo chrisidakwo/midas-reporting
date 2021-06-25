@@ -8,27 +8,29 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use Inertia;
 
 class MovementController extends Controller {
-	/**
-	 * @var DataRepository
-	 */
 	private DataRepository $dataRepository;
 
+	/**
+	 * MovementController constructor.
+	 *
+	 * @param DataRepository $dataRepository
+	 */
 	public function __construct(DataRepository $dataRepository) {
 		$this->dataRepository = $dataRepository;
 	}
 
-	public function index(Request $request) {
+	/**
+	 * @param Request $request
+	 * @return Inertia\Response
+	 */
+	public function index(Request $request): Inertia\Response {
 		[$start, $end] = getDefaultStartEndDates();
 
-//		$travellers = $this->dataRepository->getTravellersReportStatistics($start, $end);
-//
-//		dd(collect($travellers)->groupBy('Sex')->map(static function ($value) {
-//			return count($value);
-//		}));
-
-		return view('movement.index');
+		return Inertia::render('Movement', compact('start', 'end'));
 	}
 
 	/**
@@ -45,43 +47,38 @@ class MovementController extends Controller {
 
 		$movementSummary = $this->dataRepository->getMovementSummary($start, $end, $borderPoint);
 
-		$alertedPersons = count($this->dataRepository->getDoubtablePersons($start, $end));
+		$alertedPersons = $this->dataRepository->getDoubtablePersons($start, $end);
+
+		$deniedPersons = $alertedPersons->filter(function ($value) {
+			return $value->PerformedAction != 'Permit';
+		});
 
 		return response()->json(array_merge($movementSummary, [
-			'Alerts' => $alertedPersons
+			'Alerts' => count($alertedPersons),
+			'Denied' => count($deniedPersons)
 		]));
 	}
 
-	public function demographics(Request $request): JsonResponse {
-		[$start, $end] = getDefaultStartEndDates();
-
-		$borderPoint = $request->get('border');
-		if ($borderPoint === 'null') {
-			$borderPoint = null;
-		}
-
-		$travellers = $this->dataRepository->getTravellersReportStatistics($start, $end, $borderPoint);
-
-		$gender = collect($travellers)->groupBy('Sex')->map(static function ($value) {
+	/**
+	 * Get gender statistics.
+	 *
+	 * @param Collection $travellers
+	 * @return array
+	 */
+	private function _getGenderStats(Collection $travellers): array {
+		return $travellers->groupBy('Sex')->map(static function ($value) {
 			return count($value);
 		})->values()->toArray();
+	}
 
-		$transport = collect($travellers)->groupBy('TransportType')->map(static function ($value) {
-			return count($value);
-		})->reduce(function (&$carry, $value, $key) {
-			// Get the group for the said type
-			$group = TransportTypes::TYPE_GROUP[$key];
-
-			if (array_key_exists($group, $carry)) {
-				$carry[$group] += $value;
-			} else {
-				$carry[$group] = $value;
-			}
-
-			return $carry;
-		}, []);
-
-		$age = collect($travellers)->map(function ($value) {
+	/**
+	 * Get age group statistics.
+	 *
+	 * @param Collection $travellers
+	 * @return array
+	 */
+	private function _getAgeGroupStats(Collection $travellers): array {
+		return $travellers->map(function ($value) {
 			// get current age
 			$value->Age = date_diff(Carbon::parse($value->DateOfBirth), today())->y;
 
@@ -107,12 +104,91 @@ class MovementController extends Controller {
 
 			return $carry;
 		}, []);
+	}
 
-		return response()->json([
-			'gender' => $gender,
-			'transport' => $transport,
-			'age' => $age
-		]);
+	/**
+	 * Get transport mode statistics.
+	 *
+	 * @param Collection $travellers
+	 * @return array
+	 */
+	private function _getTransportModeStats(Collection $travellers): array {
+		return $travellers->groupBy('TransportType')->map(static function ($value) {
+			return count($value);
+		})->reduce(function (&$carry, $value, $key) {
+			// Get the group for the said type
+			$group = TransportTypes::TYPE_GROUP[$key];
+
+			if (array_key_exists($group, $carry)) {
+				$carry[$group] += $value;
+			} else {
+				$carry[$group] = $value;
+			}
+
+			return $carry;
+		}, []);
+	}
+
+	/**
+	 * Get travel destinations statistics.
+	 *
+	 * @param Collection $travellers
+	 * @return array
+	 */
+	private function _getTravelDestinationStats(Collection $travellers): array {
+		return $travellers->where('MovementDirection', 'Departure')->groupBy('Destination')
+			->reduce(function ($carry, $item, $key) {
+				$carry[] = [$key, count($item)];
+
+				return $carry;
+			}, [['Country', 'Travellers']]);
+	}
+
+	/**
+	 * @param Request $request
+	 * @param $type
+	 * @return JsonResponse
+	 */
+	public function demographics(Request $request, $type): JsonResponse {
+		[$start, $end] = getDefaultStartEndDates();
+
+		$direction = $request->get('direction');
+		if ($direction && ($direction == 'entry')) {
+			$direction = 'Arrival';
+		} else if ($direction && ($direction == 'exit')) {
+			$direction = 'Departure';
+		}
+
+		$borderPoint = $request->get('border');
+		if ($borderPoint === 'null') {
+			$borderPoint = null;
+		}
+
+		$travellers = collect($this->dataRepository->getTravellersReportStatistics($start, $end, $borderPoint));
+
+		if ($direction) {
+			$travellers = $travellers->filter(function ($value) use ($direction) {
+				return $value->MovementDirection == $direction;
+			});
+		}
+
+		$data = [];
+
+		if ($type === 'gender') {
+			// Get gender count
+			$data = $this->_getGenderStats($travellers);
+		} else if ($type === 'transport_mode') {
+			// Get transport mode count
+			$data = $this->_getTransportModeStats($travellers);
+		} else if ($type === 'age') {
+			// Get age group count
+			$data = $this->_getAgeGroupStats($travellers);
+		} else if ($type === 'destination') {
+			// Get count of exit travellers grouped by destination country
+			$data = $this->_getTravelDestinationStats($travellers);
+		}
+
+		return response()->json($data);
 	}
 
 	/**

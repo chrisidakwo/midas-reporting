@@ -213,6 +213,12 @@ input[disabled] {
   -webkit-text-fill-color: currentColor;
 }
 
+select, select > * {
+  background-color: #fff !important;
+  font-weight: 400 !important;
+  font-family: var(--midas-font-sans) !important;
+}
+
 
 // Custom class helpers
 .antialiased {
@@ -412,6 +418,10 @@ input[disabled] {
 
 .min-h-8 {
   min-height: 2rem !important;
+}
+
+.min-h-100 {
+  min-height: 25rem !important;
 }
 
 .max-h-8 {

@@ -13,24 +13,27 @@ class DataService implements DataRepository {
 	 * @inheritDoc
 	 */
 	public function getMovementSummary(Carbon $startDate, Carbon $endDate, int $borderPoint = null): array {
-		$cacheKey = "movement_$startDate$endDate$borderPoint";
+		$cacheKey = "movement_{$startDate}_{$endDate}_$borderPoint";
 		$ttl = setCacheTTL($startDate, $endDate);
 
 		$movementSummary = Cache::remember($cacheKey, $ttl, static function () use ($startDate, $endDate, $borderPoint) {
-			return DB::select("EXEC GetMovementStatistics @PeriodStart='$startDate', @PeriodEnd='$endDate', @RegionID=NULL, " . ($borderPoint ? "@BorderPoint='$borderPoint'" : "@BorderPoint=NULL"));
+			return DB::table('MovementSummary')->whereBetween('TravelDate', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+				->when($borderPoint, function ($builder) use ($borderPoint) {
+					return $builder->where('BorderPointID', $borderPoint);
+				})->get();
 		});
 
 		if (!empty($movementSummary)) {
-			$movementSummary = collect($movementSummary)->reduce(function ($carry, $value) {
+			$movementSummary = $movementSummary->reduce(function ($carry, $value) {
 				if (empty($carry)) {
 					return [
-						'Inbound' => $value->TotalEntryPassangers,
-						'Outbound' => $value->TotalExitPassangers
+						'Inbound' => $value->TotalEntryPassengers,
+						'Outbound' => $value->TotalExitPassengers
 					];
 				} else {
 					return [
-						'Inbound' => $carry['Inbound'] + $value->TotalEntryPassangers,
-						'Outbound' => $carry['Outbound'] + $value->TotalExitPassangers
+						'Inbound' => $carry['Inbound'] + $value->TotalEntryPassengers,
+						'Outbound' => $carry['Outbound'] + $value->TotalExitPassengers
 					];
 				}
 			}, []);
@@ -47,24 +50,29 @@ class DataService implements DataRepository {
 	/**
 	 * @inheritDoc
 	 */
-	public function getDoubtablePersons(Carbon $startDate, Carbon $endDate, int $borderPoint = null): array {
-		$cacheKey = "doubtable_$startDate$endDate$borderPoint";
+	public function getDoubtablePersons(Carbon $startDate, Carbon $endDate, int $borderPoint = null): Collection {
+		$cacheKey = "doubtable_{$startDate}_{$endDate}_$borderPoint";
 		$ttl = setCacheTTL($startDate, $endDate);
 
 		return Cache::remember($cacheKey, $ttl, static function () use ($startDate, $endDate, $borderPoint) {
-			return DB::select("EXEC GetDoubtablePersons @Culture='en', @FromDate='$startDate', @ToDate='$endDate', " . ($borderPoint ? "@BorderPoint='$borderPoint'" : "@BorderPoint=NULL"));
+			return collect(DB::select("EXEC GetDoubtablePersons @Culture='en', @FromDate='$startDate', @ToDate='$endDate', " . ($borderPoint ? "@BorderPoint=$borderPoint" : "@BorderPoint=NULL")));
 		});
 	}
 
 	/**
 	 * @inheritDoc
 	 */
-	public function getTravellersReportStatistics(Carbon $startDate, Carbon $endDate, int $borderPoint = null): array {
-		$cacheKey = "travellers_report_$startDate$endDate$borderPoint";
+	public function getTravellersReportStatistics(Carbon $startDate, Carbon $endDate, int $borderPoint = null) {
+		$cacheKey = "travellers_report_{$startDate}_{$endDate}_$borderPoint";
 		$ttl = setCacheTTL($startDate, $endDate);
 
 		return Cache::remember($cacheKey, $ttl, static function () use ($startDate, $endDate, $borderPoint) {
-			return DB::select("EXEC GetReportsPassengersStatistics @culture='en', @FromDate='$startDate', @ToDate='$endDate', " . ($borderPoint ? "@BorderPoint='$borderPoint'" : "@BorderPoint=NULL"));
+			return DB::table('ReportsPassengersStatistics')->where(function ($query) use ($startDate, $endDate) {
+				return $query->whereDate('TravelDate', '>=', $startDate)
+					->whereDate('TravelDate', '<=', $endDate);
+			})->when(!empty($borderPoint), function ($builder) use ($borderPoint) {
+				return $builder->where('BorderPointID', $borderPoint);
+			})->get();
 		});
 	}
 
