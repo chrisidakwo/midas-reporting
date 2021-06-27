@@ -56,6 +56,8 @@ class SeedPassengerReportStats extends Command {
 					'MovementDirectionID' => $passengerStats[$i]->MovementDirectionID,
 					'MovementDirection' => $passengerStats[$i]->MovementDirection,
 					'BorderPoint' => $passengerStats[$i]->BorderPoint,
+					'ProvinceID' => $passengerStats[$i]->ProvinceID,
+					'ProvinceName' => $passengerStats[$i]->ProvinceName,
 					'DocumentTypeID' => $passengerStats[$i]->DocumentTypeID,
 					'Inspector' => $passengerStats[$i]->Inspector,
 					'Note' => $passengerStats[$i]->Note,

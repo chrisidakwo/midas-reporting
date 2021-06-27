@@ -27,6 +27,8 @@ class CreateReportsPassengersStatisticsTable extends Migration {
 			$table->string('MovementDirection');
 			$table->integer('BorderPointID');
 			$table->string('BorderPoint');
+			$table->integer('ProvinceID');
+			$table->string('ProvinceName');
 			$table->integer('DocumentTypeID');
 			$table->string('Inspector');
 			$table->longText('Note');

@@ -26,7 +26,7 @@ class DashboardController extends Controller {
 
 		$selectedState = $request->get('state');
 
-		$states = (object) [];
+		$states = $this->dataRepository->getProvincesByCountryId(290);
 
 		return Inertia::render('Dashboard', compact('startDate', 'endDate', 'states', 'selectedState'));
 	}

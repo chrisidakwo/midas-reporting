@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use stdClass;
 
 interface DataRepository {
 	/**
@@ -31,13 +32,30 @@ interface DataRepository {
 	 *
 	 * @param Carbon $startDate
 	 * @param Carbon $endDate
-	 * @param int|null $borderPoint
+	 * @param array $borderPoint
+	 * @return Collection
 	 */
-	public function getTravellersReportStatistics(Carbon $startDate, Carbon $endDate, int $borderPoint = null);
+	public function getTravellersReportStatistics(Carbon $startDate, Carbon $endDate, array $borderPoint = []): Collection;
 
 	/**
 	 * @param array $filters
 	 * @return Collection
 	 */
 	public function getBorderPoints(array $filters = []): Collection;
+
+	/**
+	 * Get a country by the given name.
+	 *
+	 * @param string $name
+	 * @return object|stdClass
+	 */
+	public function getCountryByName(string $name): object;
+
+	/**
+	 * Get a list of ll provinces associated to the given country ID.
+	 *
+	 * @param int $countryID
+	 * @return array
+	 */
+	public function getProvincesByCountryId(int $countryID): array;
 }

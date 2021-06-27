@@ -36,13 +36,15 @@ mix.js('resources/js/app.js', 'public/js').vue()
     '@': path.resolve('resources/js'),
     ziggy: path.resolve('vendor/tightenco/ziggy/dist/vue'), // vendor/tightenco/ziggy/dist or 'vendor/tightenco/ziggy/dist/vue' if you're using the Vue plugin
   }).ziggy();
-  // .extract(['jquery', 'moment', 'bootstrap', 'popper.js', 'axios', 'lodash'])
+  // .extract(['jquery', 'axios', 'lodash'])
   // .sourceMaps();
 
-mix.browserSync('midas-reporting.test');
+if (!(mix.inProduction())) {
+  mix.browserSync('midas-reporting.test');
+}
 
 if (mix.inProduction()) {
-  mix.extract(['vue', 'axios', 'lodash'])
+  mix.extract(['vue', 'axios', 'moment', 'popper.js', 'bootstrap', 'lodash', 'material-icons'])
     .sourceMaps()
     .version();
 }

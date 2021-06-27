@@ -2,6 +2,7 @@ require('./bootstrap');
 
 // Import modules...
 import {createApp, h} from 'vue';
+import { createInertiaApp } from '@inertiajs/inertia-vue3';
 import {App as InertiaApp, plugin as InertiaPlugin} from '@inertiajs/inertia-vue3';
 import {InertiaProgress} from '@inertiajs/progress';
 import {ZiggyVue} from 'ziggy';
@@ -15,21 +16,23 @@ import VueApexCharts from "vue3-apexcharts";
 
 const el = document.getElementById('app');
 
-createApp({
-  render: () =>
-    h(InertiaApp, {
-      initialPage: JSON.parse(el.dataset.page),
-      resolveComponent: (name) => require(`./Pages/${name}`).default,
-    }),
+createInertiaApp({
+  resolve: name => require(`./Pages/${name}`),
+  setup({ el ,app, props, plugin }) {
+    createApp({
+      render: () => h(app, props),
+    })
+      .mixin({methods: {route}})
+      .use(InertiaPlugin)
+      .use(ZiggyVue, Ziggy)
+      .use(VCalendar, {})
+      .use(VueRx)
+      .use(VueAxios, window.axios)
+      .use(VueApexCharts)
+      .mount(el);
+
+  }
 })
-  .mixin({methods: {route}})
-  .use(InertiaPlugin)
-  .use(ZiggyVue, Ziggy)
-  .use(VCalendar, {})
-  .use(VueRx)
-  .use(VueAxios, window.axios)
-  .use(VueApexCharts)
-  .mount(el);
 
 InertiaProgress.init({
   color: '#0033a0',

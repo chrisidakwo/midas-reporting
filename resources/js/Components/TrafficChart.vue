@@ -1,13 +1,13 @@
 <template>
   <app-card class="p-4" :loading="loading">
     <template #default>
-      <div class="d-flex flex-column">
+      <div class="d-flex flex-column w-100">
         <div class="d-flex align-items-center justify-content-between" style="padding-bottom: 1rem">
           <div class="fw-bold text-md text-secondary text-uppercase tracking-wider">Traffic By State</div>
         </div>
 
-        <div class="d-flex flex-fill align-items-center">
-          <apexchart type="bar" :series="series" :options="chartOptions"/>
+        <div class="d-flex flex-fill align-items-center w-100">
+          <apexchart class="w-100" type="bar" :series="series" :options="chartOptions"/>
         </div>
       </div>
     </template>

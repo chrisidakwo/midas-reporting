@@ -4,9 +4,11 @@ namespace App\Services;
 
 use App\Repositories\DataRepository;
 use Carbon\Carbon;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 
 class DataService implements DataRepository {
 	/**
@@ -62,8 +64,8 @@ class DataService implements DataRepository {
 	/**
 	 * @inheritDoc
 	 */
-	public function getTravellersReportStatistics(Carbon $startDate, Carbon $endDate, int $borderPoint = null) {
-		$cacheKey = "travellers_report_{$startDate}_{$endDate}_$borderPoint";
+	public function getTravellersReportStatistics(Carbon $startDate, Carbon $endDate, array $borderPoint = []): Collection {
+		$cacheKey = "travellers_report_{$startDate}_{$endDate}_" . json_encode($borderPoint);
 		$ttl = setCacheTTL($startDate, $endDate);
 
 		return Cache::remember($cacheKey, $ttl, static function () use ($startDate, $endDate, $borderPoint) {
@@ -71,7 +73,7 @@ class DataService implements DataRepository {
 				return $query->whereDate('TravelDate', '>=', $startDate)
 					->whereDate('TravelDate', '<=', $endDate);
 			})->when(!empty($borderPoint), function ($builder) use ($borderPoint) {
-				return $builder->where('BorderPointID', $borderPoint);
+				return $builder->whereIn('BorderPointID', $borderPoint);
 			})->get();
 		});
 	}
@@ -86,6 +88,32 @@ class DataService implements DataRepository {
 			return DB::table('BorderPoints')->when(!empty($filters), function ($query) use ($filters) {
 				$query->where($filters);
 			})->get();
+		});
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function getCountryByName(string $name): object {
+		$cacheKey = "countries123_$name";
+
+		return Cache::remember($cacheKey, setCacheTTL(), static function () use ($name) {
+			$country = DB::select("EXEC GetCountryByName @culture='en', @countryName='$name'");
+
+			return Arr::get($country, 0, (object) []);
+		});
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function getProvincesByCountryId(int $countryID): array {
+		$cacheKey = "provinces_$countryID";
+
+		return Cache::remember($cacheKey, setCacheTTL(), static function () use ($countryID) {
+			$states =  DB::select("EXEC GetProvincesByCountry @Culture='en', @countryID='$countryID'");
+
+			return Arr::sort($states, 'Name');
 		});
 	}
 }

@@ -40,7 +40,7 @@ function getDefaultStartEndDates(Request $request = null): array {
  * @return \Illuminate\Support\Carbon
  */
 function setCacheTTL(Carbon $startDate = null, Carbon $endDate = null): \Illuminate\Support\Carbon {
-	if ($startDate != null && $endDate !== null) {
+	if ($startDate != null && $endDate != null) {
 		if ($startDate->isToday() || $endDate->isToday()) {
 			return now()->addMinutes(5);
 		}

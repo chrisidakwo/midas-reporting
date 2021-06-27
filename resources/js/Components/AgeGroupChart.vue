@@ -20,7 +20,7 @@
         </div>
 
         <div class="d-flex flex-fill flex-column align-items-center justify-content-center w-full pb-6">
-          <apexchart :series="series" :options="options" height="24" width="100%" />
+          <apexchart class="w-100" :series="series" :options="options" height="24" width="100%" />
         </div>
 
         <div class="d-flex flex-column justify-content-end text-md">

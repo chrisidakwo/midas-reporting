@@ -21,7 +21,7 @@
         </div>
 
         <div class="d-flex flex-column flex-fill pb-6">
-          <apexchart type="donut" height="190" :series="series" :options="options"/>
+          <apexchart class="w-100" type="donut" height="190" :series="series" :options="options"/>
         </div>
 
         <div class="d-flex flex-column justify-content-end fs-sm">

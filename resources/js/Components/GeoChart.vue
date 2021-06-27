@@ -4,7 +4,8 @@
       <div class="d-flex flex-column flex-fill">
         <div class="d-flex flex-column mb-3">
           <div class="d-flex align-items-center justify-content-between">
-            <div class="fw-bold text-secondary text-uppercase tracking-wider" style="font-size: var(--midas-font-size-xs)">
+            <div class="fw-bold text-secondary text-uppercase tracking-wider"
+                 style="font-size: var(--midas-font-size-xs)">
               {{ title }}
             </div>
           </div>
@@ -30,7 +31,22 @@ import GChart from "../Components/GoogleChart/GChart";
 
 export default {
   components: {AppCard, GChart},
-  props: ['title', 'subtitle', 'series', 'loading'],
+  props: {
+    title: String,
+    subtitle: String,
+    series: {
+      type: Array,
+      default: []
+    },
+    loading: {
+      type: Boolean,
+      default: false
+    },
+    chartColors: {
+      type: Array,
+      default: ['#0033a0']
+    }
+  },
   data() {
     return {
       chartOptions: {
@@ -40,7 +56,7 @@ export default {
         },
         colorAxis: {
           minValue: 0,
-          colors: ['#0033a0']
+          colors: this.chartColors
         }
       },
       chartSettings: {

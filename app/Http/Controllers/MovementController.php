@@ -83,7 +83,7 @@ class MovementController extends Controller {
 			$value->Age = date_diff(Carbon::parse($value->DateOfBirth), today())->y;
 
 			return $value;
-		})->reduce(function (&$carry, $value, $key) {
+		})->reduce(function ($carry, $value, $key) {
 			$age = $value->Age;
 
 			// Under 10
@@ -136,9 +136,30 @@ class MovementController extends Controller {
 	 * @return array
 	 */
 	private function _getTravelDestinationStats(Collection $travellers): array {
-		return $travellers->where('MovementDirection', 'Departure')->groupBy('Destination')
-			->reduce(function ($carry, $item, $key) {
-				$carry[] = [$key, count($item)];
+		return $travellers->where('MovementDirection', 'Departure')->where('Destination', '!=', 'Nigeria')
+			->groupBy('Destination')
+			->reduce(function ($carry, $records, $destination) {
+				$destination = $this->_getGoogleChartCountryName($destination);
+
+
+				$carry[] = [$destination, count($records)];
+
+				return $carry;
+			}, [['Country', 'Travellers']]);
+	}
+
+	/**
+	 * Get nationalities statistics.
+	 *
+	 * @param Collection $travellers
+	 * @return mixed
+	 */
+	private function _getNationalitiesStats(Collection $travellers): array {
+		return $travellers->where('MovementDirection', 'Arrival')->groupBy('OfficialName')
+			->reduce(function ($carry, $records, $nation) {
+				$nation = $this->_getGoogleChartCountryName($nation);
+
+				$carry[] = [$nation, count($records)];
 
 				return $carry;
 			}, [['Country', 'Travellers']]);
@@ -160,11 +181,13 @@ class MovementController extends Controller {
 		}
 
 		$borderPoint = $request->get('border');
-		if ($borderPoint === 'null') {
-			$borderPoint = null;
+		if ($borderPoint == null || $borderPoint == 'null') {
+			$borderPoint = [];
+		} else {
+			$borderPoint = explode(',', $borderPoint);
 		}
 
-		$travellers = collect($this->dataRepository->getTravellersReportStatistics($start, $end, $borderPoint));
+		$travellers = $this->dataRepository->getTravellersReportStatistics($start, $end, array_filter($borderPoint));
 
 		if ($direction) {
 			$travellers = $travellers->filter(function ($value) use ($direction) {
@@ -186,6 +209,8 @@ class MovementController extends Controller {
 		} else if ($type === 'destination') {
 			// Get count of exit travellers grouped by destination country
 			$data = $this->_getTravelDestinationStats($travellers);
+		} else if ($type === 'nationalities') {
+			$data = $this->_getNationalitiesStats($travellers);
 		}
 
 		return response()->json($data);
@@ -205,47 +230,37 @@ class MovementController extends Controller {
 
 		$travellers = $this->dataRepository->getTravellersReportStatistics($start, $end);
 
-		$traffic = collect($travellers)->groupBy(['BorderPointID'])->toArray();
+		$traffic = $travellers->groupBy(['ProvinceName'])->toArray();
 
 		$statesArr = [];
 		$series = [];
 
-		foreach ($traffic as $borderPointID => $trafficStat) {
-			$_state = $this->dataRepository->getBorderPoints([['OwnerID', $borderPointID]])
-				->when(!empty($states), function ($query) use ($states) {
-					return $query->filter(function ($value) use ($states) {
-						return in_array($value->State, $states);
-					});
-				})->first();
+		foreach ($traffic as $state => $trafficStat) {
+			$state = $state ?: 'Others';
 
-			if ($_state) {
-				// Get the state for the border and assign to states array
-				$state = $_state->State;
+			// Get the transport group for the border point
+			$transportType = $trafficStat[0]->TransportType; // Considering all records within this border point will always have the same TransportType value
+			$transportGroup = TransportTypes::TYPE_GROUP[$transportType];
 
-				// Get the transport group for the border point
-				$transportType = $trafficStat[0]->TransportType; // Considering all records within this border point will always have the same TransportType value
-				$transportGroup = TransportTypes::TYPE_GROUP[$transportType];
+			$borderTrafficCount = count($trafficStat);
 
-				$borderTrafficCount = count($trafficStat);
+			if (array_key_exists($state, $statesArr)) {
+				$stateIndex = array_search($state, $statesArr);
 
-				if (array_key_exists($state, $statesArr)) {
-					$stateIndex = array_search($state, $statesArr);
+				// At the point, $series[$transportGroup][$stateIndex] must have a value because we set a default series for the state (in the else block when we added the state to the states array)
+				$series[$transportGroup][$stateIndex] += $borderTrafficCount;
+			} else {
+				// Set default values for transport groups
+				$series['Air'][] = 0;
+				$series['Land'][] = 0;
+				$series['Sea'][] = 0;
 
-					// At the point, $series[$transportGroup][$stateIndex] must have a value because we set a default series for the state (in the else block when we added the state to the states array)
-					$series[$transportGroup][$stateIndex] += $borderTrafficCount;
-				} else {
-					// Set default values for transport groups
-					$series['Air'][] = 0;
-					$series['Land'][] = 0;
-					$series['Sea'][] = 0;
+				// Add state to state array
+				$statesArr[] = $state;
 
-					// Add state to state array
-					$statesArr[] = $state;
-
-					// update the series array with actual border transport count
-					$stateIndex = array_search($state, $statesArr);
-					$series[$transportGroup][$stateIndex] = $borderTrafficCount;
-				}
+				// update the series array with actual border transport count
+				$stateIndex = array_search($state, $statesArr);
+				$series[$transportGroup][$stateIndex] = $borderTrafficCount;
 			}
 		}
 
@@ -260,5 +275,41 @@ class MovementController extends Controller {
 			'traffic' => $series,
 			'states' => $statesArr
 		]);
+	}
+
+	/**
+	 * Get the google chart name for the provided country.
+	 *
+	 * @param string $country
+	 * @return string
+	 */
+	private function _getGoogleChartCountryName(string $country): string {
+		if ($country == 'United States of America') {
+			$country = 'United States';
+		} else if ($country === 'Russian Federation') {
+			$country = 'Russia';
+		} else if ($country === 'Congo, The Democratic Republic') {
+			$country = 'Congo - Kinshasa';
+		} else if ($country === 'Congo') {
+			$country = 'Congo - Brazzaville';
+		} else if ($country === 'DEMOCRATIC PEOPLES REPUBLIC OF') {
+			$country = 'North Korea';
+		} else if ($country === 'Côte d\'Ivoire') {
+			$country = 'Ivory Coast';
+		} else if ($country === 'Hong Kong Special Administrative Region of China') {
+			$country = 'Hong Kong';
+		} else if ($country === 'Iran (Islamic Republic of)') {
+			$country = 'Iran';
+		} else if ($country === 'Lao People\'s Democratic Republic') {
+			$country = 'Laos';
+		} else if ($country === 'Republic of Korea') {
+			$country = 'South Korea';
+		} else if ($country === 'Tanzania, United Republic of') {
+			$country = 'Tanzania';
+		} else if ($country === 'Viet Nam') {
+			$country = 'Vietnam';
+		}
+
+		return $country;
 	}
 }
