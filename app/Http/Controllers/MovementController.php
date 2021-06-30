@@ -41,13 +41,18 @@ class MovementController extends Controller {
 		[$start, $end] = getDefaultStartEndDates($request);
 
 		$borderPoint = $request->get('border');
-		if ($borderPoint === 'null') {
+		if ($borderPoint === 'null' || empty($borderPoint)) {
 			$borderPoint = null;
 		}
 
-		$movementSummary = $this->dataRepository->getMovementSummary($start, $end, $borderPoint);
+		$state = $request->get('state');
+		if ($state === 'null' || empty($state)) {
+			$state = null;
+		}
 
-		$alertedPersons = $this->dataRepository->getDoubtablePersons($start, $end);
+		$movementSummary = $this->dataRepository->getMovementSummary($start, $end, $state, $borderPoint);
+
+		$alertedPersons = $this->dataRepository->getDoubtablePersons($start, $end, $state, $borderPoint);
 
 		$deniedPersons = $alertedPersons->filter(function ($value) {
 			return $value->PerformedAction != 'Permit';
@@ -181,13 +186,18 @@ class MovementController extends Controller {
 		}
 
 		$borderPoint = $request->get('border');
-		if ($borderPoint == null || $borderPoint == 'null') {
+		if ($borderPoint == 'null' || empty($borderPoint)) {
 			$borderPoint = [];
 		} else {
 			$borderPoint = explode(',', $borderPoint);
 		}
 
-		$travellers = $this->dataRepository->getTravellersReportStatistics($start, $end, array_filter($borderPoint));
+		$state = $request->get('state');
+		if ($state === 'null' || empty($state)) {
+			$state = null;
+		}
+
+		$travellers = $this->dataRepository->getTravellersReportStatistics($start, $end, $state, array_filter($borderPoint));
 
 		if ($direction) {
 			$travellers = $travellers->filter(function ($value) use ($direction) {
@@ -221,59 +231,83 @@ class MovementController extends Controller {
 	 * @return JsonResponse
 	 */
 	public function trafficByState(Request $request): JsonResponse {
-		$states = $request->get('states');
-		if ($states) {
-			$states = explode(',', $states);
-		}
-
 		[$start, $end] = getDefaultStartEndDates();
 
-		$travellers = $this->dataRepository->getTravellersReportStatistics($start, $end);
-
-		$traffic = $travellers->groupBy(['ProvinceName'])->toArray();
-
-		$statesArr = [];
-		$series = [];
-
-		foreach ($traffic as $state => $trafficStat) {
-			$state = $state ?: 'Others';
-
-			// Get the transport group for the border point
-			$transportType = $trafficStat[0]->TransportType; // Considering all records within this border point will always have the same TransportType value
-			$transportGroup = TransportTypes::TYPE_GROUP[$transportType];
-
-			$borderTrafficCount = count($trafficStat);
-
-			if (array_key_exists($state, $statesArr)) {
-				$stateIndex = array_search($state, $statesArr);
-
-				// At the point, $series[$transportGroup][$stateIndex] must have a value because we set a default series for the state (in the else block when we added the state to the states array)
-				$series[$transportGroup][$stateIndex] += $borderTrafficCount;
-			} else {
-				// Set default values for transport groups
-				$series['Air'][] = 0;
-				$series['Land'][] = 0;
-				$series['Sea'][] = 0;
-
-				// Add state to state array
-				$statesArr[] = $state;
-
-				// update the series array with actual border transport count
-				$stateIndex = array_search($state, $statesArr);
-				$series[$transportGroup][$stateIndex] = $borderTrafficCount;
-			}
+		$state = $request->get('state');
+		if ($state === 'null' || empty($state)) {
+			$state = null;
 		}
 
-		$series = array_map(function ($value, $key) {
-			return [
-				'name' => $key,
-				'data' => $value
-			];
-		}, $series, array_keys($series));
+		$travellers = $this->dataRepository->getTravellersReportStatistics($start, $end, $state);
+
+		$categories = [];
+		$series = [];
+
+		if ($state !== null) {
+			// Group by transport type
+			$travellers = $travellers->groupBy('TransportType')->map(function ($records) {
+				return count($records);
+			});
+
+			$_series = [];
+			foreach ($travellers as $transportType => $count) {
+				$transportGroup = TransportTypes::TYPE_GROUP[$transportType];
+
+				if (array_key_exists($transportGroup, $_series)) {
+					$_series[$transportGroup] += $count;
+				} else {
+					$_series[$transportGroup] = $count;
+				}
+			}
+
+			$categories = array_keys($_series);
+			$series = [[
+				'name' => 'Traffic for State',
+				'data' =>  array_values($_series)
+			]];
+		} else {
+			$traffic = $travellers->groupBy(['ProvinceName'])->toArray();
+
+			foreach ($traffic as $state => $trafficStat) {
+				$state = $state ?: 'Others';
+
+				// Get the transport group for the border point
+				$transportType = $trafficStat[0]->TransportType; // Considering all records within this border point will always have the same TransportType value
+				$transportGroup = TransportTypes::TYPE_GROUP[$transportType];
+
+				$borderTrafficCount = count($trafficStat);
+
+				if (array_key_exists($state, $categories)) {
+					$stateIndex = array_search($state, $categories);
+
+					// At the point, $series[$transportGroup][$stateIndex] must have a value because we set a default series for the state (in the else block when we added the state to the states array)
+					$series[$transportGroup][$stateIndex] += $borderTrafficCount;
+				} else {
+					// Set default values for transport groups
+					$series['Air'][] = 0;
+					$series['Land'][] = 0;
+					$series['Sea'][] = 0;
+
+					// Add state to state array
+					$categories[] = $state;
+
+					// update the series array with actual border transport count
+					$stateIndex = array_search($state, $categories);
+					$series[$transportGroup][$stateIndex] = $borderTrafficCount;
+				}
+			}
+
+			$series = array_map(function ($value, $key) {
+				return [
+					'name' => $key,
+					'data' => $value
+				];
+			}, $series, array_keys($series));
+		}
 
 		return response()->json([
 			'traffic' => $series,
-			'states' => $statesArr
+			'states' => $categories
 		]);
 	}
 

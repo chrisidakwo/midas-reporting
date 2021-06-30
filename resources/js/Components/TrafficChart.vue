@@ -19,7 +19,7 @@ import AppCard from '../Components/Card';
 
 export default {
   components: {AppCard},
-  props: ['series', 'states', 'loading'],
+  props: ['series', 'states', 'loading', 'selectedState'],
   subscriptions() {
     this.$watchAsObservable('series').subscribe(res => {
       const newSeries = res.newValue;
@@ -29,6 +29,10 @@ export default {
           series: newSeries
         }
       }
+    })
+
+    this.$watchAsObservable('selectedState').subscribe(res => {
+      this.oneState = res.newValue;
     })
 
     this.$watchAsObservable('states').subscribe(res => {
@@ -45,13 +49,13 @@ export default {
   },
   data() {
     return {
-      selectedStates: [],
+      oneState: null,
       chartOptions: {
         series: this.series,
         chart: {
           type: 'bar',
-          height: '100%',
-          stacked: true,
+          height: this.oneState ? '350' : '100%',
+          stacked: !this.oneState,
           foreColor: 'inherit',
           fontFamily: 'inherit',
           animations: {

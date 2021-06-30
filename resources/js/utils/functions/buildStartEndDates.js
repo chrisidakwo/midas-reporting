@@ -2,7 +2,7 @@ import formatDate from "./fomatDate";
 
 export default function buildStartEndDates(range = null) {
   if (range == null) {
-    return ['2019-10-22', '2019-12-03'];
+    return ['2019-10-22', '2020-01-25'];
   }
 
   let startDate = range.start;

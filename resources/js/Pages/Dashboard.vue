@@ -101,7 +101,7 @@
     <div class="row mb-4">
       <div class="col-12">
         <div class="px-4">
-          <traffic-chart :series="trafficSeries" :states="trafficStates" :loading="trafficLoading"/>
+          <traffic-chart :series="trafficSeries" :states="trafficStates" :selectedState="selectedState" :loading="trafficLoading"/>
         </div>
       </div>
     </div>
@@ -111,7 +111,7 @@
 <script>
 import AppLayout from "../Layouts/AppLayout";
 import AppCard from '../Components/Card';
-import {ref, toRef, reactive} from 'vue';
+import {ref} from 'vue';
 import MovementCount from "../Components/MovementCount";
 import GenderChart from "../Components/GenderChart";
 import TransportModeChart from "../Components/TransportModeChart";
@@ -162,13 +162,13 @@ export default {
   data() {
     return {
       // Loaders
-      movementLoading: false,
-      genderDemographicsLoading: false,
-      ageGroupDemographicsLoading: false,
-      transportModeDemographicsLoading: false,
-      trafficLoading: false,
-      destinationsLoading: false,
-      nationalitiesLoading: false,
+      movementLoading: true,
+      genderDemographicsLoading: true,
+      ageGroupDemographicsLoading: true,
+      transportModeDemographicsLoading: true,
+      trafficLoading: true,
+      destinationsLoading: true,
+      nationalitiesLoading: true,
 
       // Flag variables
       selectedState: null,
@@ -206,10 +206,6 @@ export default {
     }
   },
   methods: {
-    dateUpdated(e) {
-      this.range = e;
-    },
-
     clearAll() {
       this.selectedState = null;
     },
@@ -267,7 +263,7 @@ export default {
 
     async getGenderDemographicData(dates, query) {
       // Load gender statistics
-      const res = await this.axios.get(`/movement/demographics/gender?start_date=${dates[0]}&end_date=${dates[1]}&direction=${this.genderDirection}`);
+      const res = await this.axios.get(`/movement/demographics/gender?start_date=${dates[0]}&end_date=${dates[1]}&direction=${this.genderDirection}` + (query.toString() ? `&${query.toString()}` : ''));
       if (res && res.status === 200) {
         this.genderStats = res.data;
       }
@@ -275,7 +271,7 @@ export default {
 
     async getTransportModeDemographicData(dates, query) {
       // Load transport statistics to catch
-      const res = await this.axios.get(`/movement/demographics/transport_mode?start_date=${dates[0]}&end_date=${dates[1]}&direction=${this.transportModeDirection}`);
+      const res = await this.axios.get(`/movement/demographics/transport_mode?start_date=${dates[0]}&end_date=${dates[1]}&direction=${this.transportModeDirection}` + (query.toString() ? `&${query.toString()}` : ''));
       if (res && res.status === 200) {
         this.transportStats = [
           {name: 'Air', data: [res.data.Air]},
@@ -287,7 +283,7 @@ export default {
 
     async getAgeGroupDemographicData(dates, query) {
       // Load transport statistics to catch
-      const res = await this.axios.get(`/movement/demographics/age?start_date=${dates[0]}&end_date=${dates[1]}&direction=${this.ageDirection}`);
+      const res = await this.axios.get(`/movement/demographics/age?start_date=${dates[0]}&end_date=${dates[1]}&direction=${this.ageDirection}` + (query.toString() ? `&${query.toString()}` : ''));
       if (res && res.status === 200) {
         this.ageStats = [
           {name: 'Under 10', data: [res.data['10']]},
@@ -301,7 +297,7 @@ export default {
 
     async getTravelDestinationDemographicData(dates, query) {
       // Load travel destination statistics to catch
-      const res = await this.axios.get(`/movement/demographics/destination?start_date=${dates[0]}&end_date=${dates[1]}&direction=exit`);
+      const res = await this.axios.get(`/movement/demographics/destination?start_date=${dates[0]}&end_date=${dates[1]}&direction=exit` + (query.toString() ? `&${query.toString()}` : ''));
       if (res && res.status === 200) {
         this.destinationsStat = res.data;
       }
@@ -309,14 +305,14 @@ export default {
 
     async getNationalitiesDemographicData(dates, query) {
       // Load incoming nationals' statistics to catch
-      const res = await this.axios.get(`/movement/demographics/nationalities?start_date=${dates[0]}&end_date=${dates[1]}&direction=entry`);
+      const res = await this.axios.get(`/movement/demographics/nationalities?start_date=${dates[0]}&end_date=${dates[1]}&direction=entry` + (query.toString() ? `&${query.toString()}` : ''));
       if (res && res.status === 200) {
         this.nationalitiesStat = res.data;
       }
     },
 
     async getMovementSummaryData(dates, query) {
-      let res = await this.axios.get(`/movement/summary?start_date=${dates[0]}&end_date=${dates[1]}`);
+      let res = await this.axios.get(`/movement/summary?start_date=${dates[0]}&end_date=${dates[1]}` + (query.toString() ? `&${query.toString()}` : ''));
       if (res && res.status == 200) {
         this.movementSummary = {
           inbound: formatNumber(res.data.Inbound),
@@ -328,7 +324,7 @@ export default {
     },
 
     async getTrafficData(dates, query) {
-      const res = await this.axios.get(`/movement/traffic?start_date=${dates[0]}&end_date=${dates[1]}`);
+      const res = await this.axios.get(`/movement/traffic?start_date=${dates[0]}&end_date=${dates[1]}` + (query.toString() ? `&${query.toString()}` : ''));
       if (res && res.status == 200) {
         this.trafficSeries = res.data.traffic;
         this.trafficStates = res.data.states;
@@ -347,6 +343,12 @@ export default {
       // Get selected date range
       // const dates = buildStartEndDates(this.range);
       const dates = buildStartEndDates();
+
+      // Set selected state
+      const urlQuery = new URLSearchParams(window.location.search);
+      if (urlQuery.has('state') && urlQuery.get('state')) {
+        this.selectedState = urlQuery.get('state');
+      }
 
       let state = (this.selectedState) ? {state: this.selectedState} : {};
       const query = buildQueryString(state);
@@ -368,7 +370,7 @@ export default {
       this.transportModeDemographicsLoading = false;
 
       // Get age demographics data
-      await this.getAgeGroupDemographicData(dates);
+      await this.getAgeGroupDemographicData(dates, query);
       this.ageGroupDemographicsLoading = false;
 
       await this.getTravelDestinationDemographicData(dates, query);

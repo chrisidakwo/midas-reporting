@@ -41,7 +41,7 @@ class SeedMovementSummaryTable extends Command {
 
 			$this->info('Retrieving movement stats');
 
-			$movementStatistics = DB::select("EXEC GetMovementStatistics @PeriodStart='$start', @PeriodEnd='$end', @RegionID=NULL, @borderPoint=NULL");
+			$movementStatistics = DB::select("EXEC GetMovementStats @PeriodStart='$start', @PeriodEnd='$end', @RegionID=NULL, @borderPoint=NULL");
 
 			$dataLen = count($movementStatistics);
 
@@ -53,6 +53,8 @@ class SeedMovementSummaryTable extends Command {
 					'TravelDate' => $startDate->format('Y-m-d')
 				], [
 					'BorderPoint' => $movementStatistics[$i]->BorderPoint,
+					'ProvinceID' => $movementStatistics[$i]->ProvinceID,
+					'Province' => $movementStatistics[$i]->Province,
 					'RegionalSite' => $movementStatistics[$i]->RegionalSite,
 					'TotalPassengers' => $movementStatistics[$i]->TotalPassangers,
 					'TotalEntryPassengers' => $movementStatistics[$i]->TotalEntryPassangers,

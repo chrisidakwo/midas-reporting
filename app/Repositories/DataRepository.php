@@ -12,30 +12,33 @@ interface DataRepository {
 	 *
 	 * @param Carbon $startDate
 	 * @param Carbon $endDate
+	 * @param int|null $state
 	 * @param int|null $borderPoint
 	 * @return array
 	 */
-	public function getMovementSummary(Carbon $startDate, Carbon $endDate, int $borderPoint = null): array;
+	public function getMovementSummary(Carbon $startDate, Carbon $endDate, int $state = null, int $borderPoint = null): array;
 
 	/**
 	 * Get the total number of doubtable persons within the provided start and end dates.
 	 *
 	 * @param Carbon $startDate
 	 * @param Carbon $endDate
+	 * @param int|null $state
 	 * @param int|null $borderPoint
 	 * @return Collection
 	 */
-	public function getDoubtablePersons(Carbon $startDate, Carbon $endDate, int $borderPoint = null): Collection;
+	public function getDoubtablePersons(Carbon $startDate, Carbon $endDate, int $state = null, int $borderPoint = null): Collection;
 
 	/**
 	 * Get a full report of travellers (including personal and border data) within the provided start and end dates.
 	 *
 	 * @param Carbon $startDate
 	 * @param Carbon $endDate
+	 * @param int|null $state
 	 * @param array $borderPoint
 	 * @return Collection
 	 */
-	public function getTravellersReportStatistics(Carbon $startDate, Carbon $endDate, array $borderPoint = []): Collection;
+	public function getTravellersReportStatistics(Carbon $startDate, Carbon $endDate, int $state = null, array $borderPoint = []): Collection;
 
 	/**
 	 * @param array $filters

@@ -137,7 +137,6 @@ export default {
   props: ['series', 'loading'],
   computed: {
     inbound() {
-      console.log('Inbound', this.series.inbound);
       return formatNumber(this.series.inbound);
     },
 

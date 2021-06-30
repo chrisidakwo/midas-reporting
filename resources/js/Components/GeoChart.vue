@@ -64,6 +64,6 @@ export default {
         mapsApiKey: 'AIzaSyAgRTTYfIXZ3IlT3qGGIbpYQ4v0h3KlQbg'
       },
     }
-  }
+  },
 }
 </script>
