@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use stdClass;
 
@@ -36,9 +37,13 @@ interface DataRepository {
 	 * @param Carbon $endDate
 	 * @param int|null $state
 	 * @param array $borderPoint
-	 * @return Collection
+	 * @param array $columns
+	 * @param bool $paginate
+	 * @return Collection|Paginator
 	 */
-	public function getTravellersReportStatistics(Carbon $startDate, Carbon $endDate, int $state = null, array $borderPoint = []): Collection;
+	public function getTravellersReportStatistics(Carbon $startDate, Carbon $endDate, int $state = null,
+	                                              array $borderPoint = [], array $columns = [],
+	                                              bool $paginate = false);
 
 	/**
 	 * @param array $filters

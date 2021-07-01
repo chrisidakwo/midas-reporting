@@ -17,4 +17,10 @@ class TransportTypes {
 		'Motorcycle' => 'Land',
 		'Lorry' => 'Land'
 	];
+
+	public const GROUP_TYPES = [
+		'Air' => ['Flight'],
+		'Land' => ['Car', 'Bus', 'Truck', 'Pedestrian', 'Motorcycle', 'Lorry'],
+		'Sea' => ['Ship', 'Ferry', 'Boat']
+	];
 }

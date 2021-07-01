@@ -226,7 +226,11 @@ select, select > * {
   -moz-osx-font-smoothing: auto;
 }
 
-.form-control {
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-control, .form-select {
   min-height: 40px !important;
   height: 40px !important;
 }

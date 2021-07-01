@@ -71,19 +71,31 @@ class DataService implements DataRepository {
 	/**
 	 * @inheritDoc
 	 */
-	public function getTravellersReportStatistics(Carbon $startDate, Carbon $endDate, int $state = null, array $borderPoint = []): Collection {
-		$cacheKey = "travellers_report_{$startDate}_{$endDate}_" . json_encode($borderPoint);
+	public function getTravellersReportStatistics(Carbon $startDate, Carbon $endDate, int $state = null,
+	                                              array $borderPoint = [], array $columns = [],
+	                                              bool $paginate = false) {
+
+		$cacheKey = "travellers_report_{$startDate}_{$endDate}_" . json_encode($borderPoint) . '_' . json_encode($columns) . '_' . (int) $paginate;
+
+		if (request()->has('page')) {
+			$cacheKey .= ('_' . request('page'));
+		}
+
 		$ttl = setCacheTTL($startDate, $endDate);
 
-		return Cache::remember($cacheKey, $ttl, static function () use ($startDate, $endDate, $state, $borderPoint) {
-			return DB::table('ReportsPassengersStatistics')->where(function ($query) use ($startDate, $endDate) {
+		return Cache::remember($cacheKey, $ttl, static function () use ($startDate, $endDate, $state, $borderPoint, $columns, $paginate) {
+			$result = DB::table('ReportsPassengersStatistics')->where(function ($query) use ($startDate, $endDate) {
 				return $query->whereDate('TravelDate', '>=', $startDate)
 					->whereDate('TravelDate', '<=', $endDate);
 			})->when(!empty($borderPoint), function ($builder) use ($borderPoint) {
 				return $builder->whereIn('BorderPointID', $borderPoint);
 			})->when(!empty($state), function ($builder) use($state) {
 				return $builder->where('ProvinceID', $state);
-			})->get();
+			})->when(!empty($columns), function ($builder) use ($columns) {
+				return $builder->select($columns);
+			});
+
+			return ($paginate) ? $result->simplePaginate(50) : $result->get();
 		});
 	}
 
@@ -104,7 +116,7 @@ class DataService implements DataRepository {
 	 * @inheritDoc
 	 */
 	public function getCountryByName(string $name): object {
-		$cacheKey = "countries123_$name";
+		$cacheKey = "countries_$name";
 
 		return Cache::remember($cacheKey, setCacheTTL(), static function () use ($name) {
 			$country = DB::select("EXEC GetCountryByName @culture='en', @countryName='$name'");

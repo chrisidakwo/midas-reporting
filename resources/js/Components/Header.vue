@@ -15,14 +15,14 @@
 <!--          </div>-->
 <!--        </inertia-link>-->
 
-        <inertia-link :href="route('bcp.records')" class="nav-menu-item">
-          <div class="nav-item-wrapper">
-            <div class="nav-item">
-              <i class="icon nav-item-icon material-icons-outlined icon-no-color">analytics</i>
-              <span class="nav-item-title">BCP Records</span>
-            </div>
-          </div>
-        </inertia-link>
+<!--        <inertia-link :href="route('bcp.records')" class="nav-menu-item">-->
+<!--          <div class="nav-item-wrapper">-->
+<!--            <div class="nav-item">-->
+<!--              <i class="icon nav-item-icon material-icons-outlined icon-no-color">analytics</i>-->
+<!--              <span class="nav-item-title">BCP Records</span>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </inertia-link>-->
 
         <inertia-link :href="route('visas')" class="nav-menu-item">
           <div class="nav-item-wrapper">
