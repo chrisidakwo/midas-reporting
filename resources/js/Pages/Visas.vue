@@ -292,15 +292,15 @@ export default {
         },
         {
           name: 'Visa on Arrival',
-          data: [200, 491, 311, 226, 486, 207, 322, 345, 320, 216, 189, 313, 215]
+          data: [200, 491, 311, 226, 486, 207, 322, 345, 320, 216, 189, 215]
         },
         {
           name: 'Diplomatic Visa',
-          data: [83, 374, 194, 109, 338, 99, 205, 227, 212, 108, 90, 205, 98]
+          data: [83, 374, 194, 109, 338, 99, 205, 227, 212, 108, 90, 98]
         },
         {
           name: 'Business Visa',
-          data: [231, 253, 455, 522, 342, 236, 353, 370, 350, 243, 220, 340, 244]
+          data: [231, 253, 455, 522, 342, 236, 353, 370, 350, 243, 220, 340]
         },
       ],
       monthlyApplicationOptions: {
@@ -361,20 +361,23 @@ export default {
             }
           }
         },
-        tooltip: {
-          enabled: true,
-          fillSeriesColor: false,
-          theme: 'dark',
-          custom: ({series, seriesIndex, dataPointIndex, w}) => {
-            const percentage = this.format((series[seriesIndex] / 13478) * 100)
-
-            return `<div class="d-flex align-items-center h-8 min-h-8 max-h-8 px-3">
-                      <div class="w-3 h-3 rounded-full" style="background-color: ${w.config.colors[seriesIndex]};"></div>
-                      <div class="ml-2 text-md leading-none">${w.config.labels[seriesIndex]}:</div>
-                      <div class="ml-2 text-md fw-bold leading-none">${percentage}%</div>
-                  </div>`;
-          }
-        }
+        // tooltip: {
+        //   enabled: true,
+        //   fillSeriesColor: false,
+        //   theme: 'dark',
+        //   custom: ({series, seriesIndex, dataPointIndex, w}) => {
+        //     const percentage = this.format((series[seriesIndex] / 13478) * 100)
+        //
+        //     console.log(seriesIndex)
+        //     console.log(series[seriesIndex][seriesIndex])
+        //
+        //     return `<div class="d-flex align-items-center h-8 min-h-8 max-h-8 px-3">
+        //               <div class="w-3 h-3 rounded-full" style="background-color: ${w.config.colors[seriesIndex]};"></div>
+        //               <div class="ml-2 text-md leading-none">${w.config.labels[seriesIndex]}:</div>
+        //               <div class="ml-2 text-md fw-bold leading-none">${percentage}%</div>
+        //           </div>`;
+        //   }
+        // }
       },
 
       ageGroupSeries: [
