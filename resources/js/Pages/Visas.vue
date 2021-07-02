@@ -368,8 +368,6 @@ export default {
         //   custom: ({series, seriesIndex, dataPointIndex, w}) => {
         //     const percentage = this.format((series[seriesIndex] / 13478) * 100)
         //
-        //     console.log(seriesIndex)
-        //     console.log(series[seriesIndex][seriesIndex])
         //
         //     return `<div class="d-flex align-items-center h-8 min-h-8 max-h-8 px-3">
         //               <div class="w-3 h-3 rounded-full" style="background-color: ${w.config.colors[seriesIndex]};"></div>

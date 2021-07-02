@@ -1,5 +1,7 @@
 {
-    "/js/app.js": "/js/app.js",
-    "/css/material-icons.css": "/css/material-icons.css",
-    "/css/app.css": "/css/app.css"
+    "/js/app.js": "/js/app.js?id=e72546c1408ddbf90c83",
+    "/js/manifest.js": "/js/manifest.js?id=cebe639d0a21e0896239",
+    "/css/material-icons.css": "/css/material-icons.css?id=cb5c18880b70c3c6883d",
+    "/css/app.css": "/css/app.css?id=217fd7e21f837542efd6",
+    "/js/vendor.js": "/js/vendor.js?id=17ee72758f4ca2043734"
 }

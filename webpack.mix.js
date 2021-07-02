@@ -44,7 +44,8 @@ if (!(mix.inProduction())) {
 }
 
 if (mix.inProduction()) {
-  mix.extract(['vue', 'axios', 'moment', 'popper.js', 'bootstrap', 'lodash', 'material-icons'])
+  mix.extract(['vue', 'axios', 'moment', 'popper.js', 'bootstrap', 'lodash', 'material-icons',
+    '@inertiajs/inertia', '@inertiajs/inertia-vue3', '@inertiajs/progress', 'apexcharts', 'v-calendar', 'vue-axios'])
     .sourceMaps()
     .version();
 }
