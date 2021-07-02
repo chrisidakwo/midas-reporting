@@ -32,8 +32,6 @@ export default {
   },
   methods: {
     createChart(el, google) {
-      console.log(google);
-
       return new google.charts.Bar(el);
     },
 
