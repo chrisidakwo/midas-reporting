@@ -2,14 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ReportTypes;
 use App\Enums\TransportTypes;
 use App\Repositories\DataRepository;
+use Arr;
 use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Inertia;
 use Inertia\Response;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Writer\Exception;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ReportController extends Controller {
+	public const ALPHABETS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'];
+
 	private DataRepository $dataRepository;
 
 	/**
@@ -34,44 +45,28 @@ class ReportController extends Controller {
 		$stats = [];
 
 		$filters = $request->all();
-		$reportType = \Arr::get($filters, 'report_type');
+		$reportType = Arr::get($filters, 'report_type');
 
 		if (!empty($filters) && $reportType) {
-			$borderPoint = $filters['border'] ? [$filters['border']]: [];
+			$borderPoint = $filters['border'] ? [$filters['border']] : [];
 
 			if ($reportType == '1') {
 				// Get travellers statistics
 				$columns = ['OfficialName', 'DocumentNumber', 'Surname', 'GivenName', 'DateOfBirth', 'Sex', 'TravelDate', 'TransportType', 'MovementDirection', 'BorderPoint'];
-
-//				dd($startDate);
 
 				// Get series for chart
 				$series = $this->dataRepository->getTravellersReportStatistics($startDate, $endDate, null, $borderPoint, $columns, true);
 
 				// Get statistics count
 				$result = $this->dataRepository->getTravellersReportStatistics($startDate, $endDate, null, $borderPoint);
+				$stats = $this->_getGenericTravelStatistics($result);
 
-				$totalTravellers = $result->count();
-				$totalEntry = $result->where('MovementDirection', 'Arrival')->count();
-				$totalExit = $result->where('MovementDirection', 'Departure')->count();
-				$totalMaleTravellers = $result->where('Sex', 'M')->count();
-				$totalFemaleTravellers = $result->where('Sex', 'F')->count();
-				$totalAirTravellers = $result->whereIn('TransportType', TransportTypes::GROUP_TYPES['Air'])->count();
-				$totalLandTravellers = $result->whereIn('TransportType', TransportTypes::GROUP_TYPES['Land'])->count();
-				$totalSeaTravellers = $result->whereIn('TransportType', TransportTypes::GROUP_TYPES['Sea'])->count();
-
-				$stats = [
-					'total_travellers' => $totalTravellers,
-					'total_entry' => $totalEntry,
-					'total_exit' => $totalExit,
-					'total_male_travellers' => $totalMaleTravellers,
-					'total_female_travellers' => $totalFemaleTravellers,
-					'total_air_travellers' => $totalAirTravellers,
-					'total_land_travellers' => $totalLandTravellers,
-					'total_sea_travellers' => $totalSeaTravellers
-				];
 			} else if ($reportType == '2') {
-				// Get statistics by nationality
+				$series = $this->_buildStatisticsByNationalitySeries($startDate, $endDate, $borderPoint);
+
+				// Get statistical count
+				$result = $this->dataRepository->getTravellersReportStatistics($startDate, $endDate, null, $borderPoint);
+				$stats = $this->_getGenericTravelStatistics($result);
 			} else if ($reportType == '3') {
 				// Get movement statistics
 			} else if ($reportType == '4') {
@@ -79,14 +74,239 @@ class ReportController extends Controller {
 			}
 		}
 
+		$paginate = '';
+		if (is_a($series, Paginator::class)) {
+			$dataSeries = $series->items();
+			$paginate = (string) $series->appends(request()->all())->links();
+		} else {
+			$dataSeries = $series;
+		}
+
 		return Inertia::render('Report', [
 			'borderPoints' => $borderPoints,
 			'startDate' => $startDate->format('Y-m-d'),
 			'endDate' => $endDate->format('Y-m-d'),
 			'reportType' => $reportType,
-			'series' => $series->items(),
+			'series' => $dataSeries,
 			'stats' => $stats,
-			'paginate' => (string) $series->appends(request()->all())->links()
+			'paginate' => $paginate
 		]);
+	}
+
+	/**
+	 * @param Request $request
+	 * @return void
+	 * @throws Exception
+	 */
+	public function download(Request $request) {
+		// If type is not handled, just return
+		$type = $request->get('type');
+
+		if (empty($type) || !in_array($type, ['statistics', 'data'])) {
+			return;
+		}
+
+		[$startDate, $endDate] = getDefaultStartEndDates($request);
+		$filters = $request->all();
+		$reportType = Arr::get($filters, 'report_type');
+
+		$spreadsheet = new Spreadsheet();
+		$activeSheet = $spreadsheet->getActiveSheet();
+
+		// Create header and data row
+
+		if (!empty($filters) && $reportType) {
+			$borderPoint = $filters['border'] ? [$filters['border']] : [];
+
+			if ($reportType == '1') {
+				// Get statistics count
+				if ($type == 'statistics') {
+					$result = $this->dataRepository->getTravellersReportStatistics($startDate, $endDate, null, $borderPoint);
+					$stats = $this->_getGenericTravelStatistics($result);
+
+					// Build spreadsheet object
+					$alphabets = self::ALPHABETS;
+					$this->_buildSpreadsheetForGenericTravelStat($activeSheet, $startDate, $endDate, $alphabets, $stats);
+				}
+
+				if ($type == 'data') {
+					$columns = ['OfficialName', 'DocumentNumber', 'Surname', 'GivenName', 'DateOfBirth', 'Sex', 'TravelDate', 'TransportType', 'MovementDirection', 'BorderPoint', 'ProvinceName'];
+					$series = $this->dataRepository->getTravellersReportStatistics($startDate, $endDate, null, $borderPoint, $columns);
+
+					$header = ['Travel Date', 'Nationality', 'Doc No', 'Surname', 'Given Name', 'DOB', 'Sex', 'Transport Mode', 'Direction', 'BorderPoint', 'State'];
+
+					// Set header row
+					$headerLen = count($header);
+					$alphabets = self::ALPHABETS;
+
+					for ($i = 0; $i < $headerLen; $i++) {
+						$activeSheet->setCellValue("$alphabets[$i]1", $header[$i]);
+					}
+
+					// Append data
+					$dataLen = $series->count();
+					for ($i = 0; $i < $dataLen; $i++) {
+						$rowNumber = $i + 2;
+						$activeSheet->setCellValue("A$rowNumber", Carbon::parse($series[$i]->TravelDate)->format('d-m-Y'))
+							->setCellValue("B$rowNumber", $series[$i]->OfficialName)
+							->setCellValue("C$rowNumber", $series[$i]->DocumentNumber)
+							->setCellValue("D$rowNumber", $series[$i]->Surname)
+							->setCellValue("E$rowNumber", $series[$i]->GivenName)
+							->setCellValue("F$rowNumber", $series[$i]->DateOfBirth)
+							->setCellValue("G$rowNumber", $series[$i]->Sex)
+							->setCellValue("H$rowNumber", $series[$i]->TransportType)
+							->setCellValue("I$rowNumber", $series[$i]->MovementDirection)
+							->setCellValue("J$rowNumber", $series[$i]->BorderPoint)
+							->setCellValue("K$rowNumber", $series[$i]->ProvinceName);
+					}
+
+					// Auto Set the Size of Columns
+					foreach (range('A', 'K') as $columnID) {
+						$activeSheet->getColumnDimension($columnID)->setAutoSize(true);
+					}
+				}
+			} else if ($reportType == '2') {
+				// Get statistics count
+				if ($type == 'statistics') {
+					$result = $this->dataRepository->getTravellersReportStatistics($startDate, $endDate, null, $borderPoint);
+					$stats = $this->_getGenericTravelStatistics($result);
+					$alphabets = self::ALPHABETS;
+
+					$this->_buildSpreadsheetForGenericTravelStat($activeSheet, $startDate, $endDate, $alphabets, $stats);
+				}
+
+				if ($type == 'data') {
+					$series = $this->_buildStatisticsByNationalitySeries($startDate, $endDate, $borderPoint);
+				}
+			} else if ($reportType == '3') {
+				// Get statistics count
+				if ($type == 'statistics') {
+					$result = $this->dataRepository->getTravellersReportStatistics($startDate, $endDate, null, $borderPoint);
+					$stats = $this->_getGenericTravelStatistics($result);
+					$alphabets = self::ALPHABETS;
+
+					$this->_buildSpreadsheetForGenericTravelStat($activeSheet, $startDate, $endDate, $alphabets, $stats);
+				}
+
+
+				$header = [];
+			} else if ($reportType == '4') {
+				// Get statistics count
+				if ($type == 'statistics') {
+					$result = $this->dataRepository->getTravellersReportStatistics($startDate, $endDate, null, $borderPoint);
+					$stats = $this->_getGenericTravelStatistics($result);
+					$alphabets = self::ALPHABETS;
+
+					$this->_buildSpreadsheetForGenericTravelStat($activeSheet, $startDate, $endDate, $alphabets, $stats);
+				}
+
+				$header = [];
+			}
+
+			$reportTypeName = Str::slug(ReportTypes::VALUES[$reportType]);
+			header('Content-Type: application/vnd.ms-excel');
+			header("Content-Disposition: attachment;filename=$reportTypeName-$type-report.xlsx");
+			header('Cache-Control: max-age=0');
+
+			$writer = new Xlsx($spreadsheet);
+			$writer->save('php://output');
+		}
+	}
+
+	/**
+	 * @param Worksheet $activeSheet
+	 * @param Carbon $startDate
+	 * @param Carbon $endDate
+	 * @param array $alphabets
+	 * @param array $statistics
+	 */
+	private function _buildSpreadsheetForGenericTravelStat(Worksheet &$activeSheet, Carbon $startDate, Carbon $endDate, array $alphabets, array $statistics) {
+		$header = ['Total Travellers', 'Total Entry', 'Total Exit', 'Total Male Travellers',
+			'Total Female Travellers', 'Total Air Travellers', 'Total Land Travellers', 'Total Sea Travellers'];
+
+		$headerLen = count($header);
+
+		// Set travel date header and data row
+		$activeSheet = $activeSheet->setCellValue('A1', 'Travel Date');
+		$activeSheet = $activeSheet->setCellValue('A2', sprintf('%s to %s', $startDate->format('Y-m-d'), $endDate->format('Y-m-d')));
+
+		for ($i = 0; $i < $headerLen; $i++) {
+			$headerAlphabet = $alphabets[$i +1];
+
+			$activeSheet = $activeSheet->setCellValue("{$headerAlphabet}1", $header[$i]);
+			$activeSheet = $activeSheet->setCellValue("{$headerAlphabet}2", $statistics[Str::slug($header[$i], '_')]);
+		}
+
+		// Format number column
+		$activeSheet->getStyle('A2:T2')->getNumberFormat()
+			->setFormatCode('#,##0');
+
+		// Auto Set the Size of Columns
+		foreach (range('A', 'I') as $columnID) {
+			$activeSheet->getColumnDimension($columnID)->setAutoSize(true);
+		}
+	}
+
+	/**
+	 * @param Collection $data
+	 * @return array
+	 */
+	private function _getGenericTravelStatistics(Collection $data): array {
+		$totalTravellers = $data->count();
+		$totalEntry = $data->where('MovementDirection', 'Arrival')->count();
+		$totalExit = $data->where('MovementDirection', 'Departure')->count();
+		$totalMaleTravellers = $data->where('Sex', 'M')->count();
+		$totalFemaleTravellers = $data->where('Sex', 'F')->count();
+		$totalAirTravellers = $data->whereIn('TransportType', TransportTypes::GROUP_TYPES['Air'])->count();
+		$totalLandTravellers = $data->whereIn('TransportType', TransportTypes::GROUP_TYPES['Land'])->count();
+		$totalSeaTravellers = $data->whereIn('TransportType', TransportTypes::GROUP_TYPES['Sea'])->count();
+
+		return [
+			'total_travellers' => $totalTravellers,
+			'total_entry' => $totalEntry,
+			'total_exit' => $totalExit,
+			'total_male_travellers' => $totalMaleTravellers,
+			'total_female_travellers' => $totalFemaleTravellers,
+			'total_air_travellers' => $totalAirTravellers,
+			'total_land_travellers' => $totalLandTravellers,
+			'total_sea_travellers' => $totalSeaTravellers
+		];
+	}
+
+	/**
+	 * @param Carbon $startDate
+	 * @param Carbon $endDate
+	 * @param array $borderPoint
+	 * @return array
+	 */
+	private function _buildStatisticsByNationalitySeries(Carbon $startDate, Carbon $endDate, array $borderPoint): array {
+		$columns = ['OfficialName', 'Sex', 'TransportType', 'MovementDirection'];
+
+		$series = $this->dataRepository->getTravellersReportStatistics($startDate, $endDate, null, $borderPoint, $columns)
+			->reduce(function (&$carry, $item) {
+
+				if (array_key_exists($item->OfficialName, $carry)) {
+					if (array_key_exists($item->MovementDirection, $carry[$item->OfficialName])) {
+						$carry[$item->OfficialName][$item->MovementDirection] += 1;
+					} else {
+						$carry[$item->OfficialName][$item->MovementDirection] = 1;
+					}
+				} else {
+					// First set both arrival and departure key
+					$carry[$item->OfficialName]['Arrival'] = 0;
+					$carry[$item->OfficialName]['Departure'] = 0;
+
+					// Then update the one available in the current item
+					$carry[$item->OfficialName][$item->MovementDirection] = 1;
+				}
+
+				return $carry;
+			}, []);
+
+		return collect($series)->reduce(function ($carry, $item, $key) {
+			$carry[] = [$key, $item['Arrival'], $item['Departure']];
+
+			return $carry;
+		}, []);
 	}
 }

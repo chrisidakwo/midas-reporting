@@ -25,6 +25,7 @@ Route::domain(config('app.domain'))->group(function () {
 	Route::get('/visas', [VisaController::class, 'index'])->name('visas');
 	Route::get('/insights', [InsightController::class, 'index'])->name('insights');
 	Route::get('/reports', [ReportController::class, 'index'])->name('reports');
+	Route::get('/reports/download', [ReportController::class, 'download'])->name('reports.download');
 	Route::get('/border-points', [DashboardController::class, 'borderPoints'])->name('border_points');
 
 	Route::group(['prefix' => 'movement', 'as' => 'movement.'], static function () {

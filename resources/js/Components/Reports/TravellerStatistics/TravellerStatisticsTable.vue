@@ -2,11 +2,6 @@
   <g-chart type="Table" :data="chartSeries" class="mb-3" />
 
   <div v-html="paginationLinks"></div>
-
-  <div class="d-flex" v-if="nextPage">
-    <a href="" class="btn btn-outline-secondary me-1">Previous</a>
-    <a :href="nextPageUrl" class="btn btn-outline-secondary">Next</a>
-  </div>
 </template>
 
 <script>

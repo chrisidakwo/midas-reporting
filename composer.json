@@ -6,6 +6,7 @@
     "license": "Proprietary",
     "require": {
         "php": "^7.4|^8.0",
+        "ext-json": "*",
         "consoletvs/charts": "^7.2",
         "fideloper/proxy": "^4.4",
         "fruitcake/laravel-cors": "^2.0",
@@ -14,8 +15,8 @@
         "laravel/framework": "^8.12",
         "laravel/tinker": "^2.5",
         "livewire/livewire": "^2.4",
-        "tightenco/ziggy": "^1.2",
-      "ext-json": "*"
+        "phpoffice/phpspreadsheet": "^1.18",
+        "tightenco/ziggy": "^1.2"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.10",

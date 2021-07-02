@@ -341,8 +341,16 @@ export default {
       this.nationalitiesLoading = true;
 
       // Get selected date range
-      // const dates = buildStartEndDates(this.range);
-      const dates = buildStartEndDates();
+      let dateRange = null;
+      let query = new URLSearchParams(location.search);
+      if (query.has('start_date') && query.has('end_date')) {
+        dateRange = {
+          start: this.startDate,
+          end: this.endDate
+        }
+      }
+
+      const dates = buildStartEndDates(dateRange);
 
       // Set selected state
       const urlQuery = new URLSearchParams(window.location.search);
@@ -351,7 +359,7 @@ export default {
       }
 
       let state = (this.selectedState) ? {state: this.selectedState} : {};
-      const query = buildQueryString(state);
+      query = buildQueryString(state);
 
       if (query.toString().length > 0) {
         history.pushState({}, document.title, window.location.href.split('?')[0] + '?' + query.toString());

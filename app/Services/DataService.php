@@ -77,8 +77,8 @@ class DataService implements DataRepository {
 
 		$cacheKey = "travellers_report_{$startDate}_{$endDate}_" . json_encode($borderPoint) . '_' . json_encode($columns) . '_' . (int) $paginate;
 
-		if (request()->has('page')) {
-			$cacheKey .= ('_' . request('page'));
+		if ($paginate) {
+			$cacheKey .= ('_' . request('page', 1));
 		}
 
 		$ttl = setCacheTTL($startDate, $endDate);
