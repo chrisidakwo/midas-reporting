@@ -33,14 +33,14 @@
           </div>
         </inertia-link>
 
-        <inertia-link :href="route('insights')" class="nav-menu-item">
-          <div class="nav-item-wrapper">
-            <div class="nav-item">
-              <i class="icon nav-item-icon material-icons-outlined icon-no-color">insights</i>
-              <span class="nav-item-title">Insights</span>
-            </div>
-          </div>
-        </inertia-link>
+<!--        <inertia-link :href="route('insights')" class="nav-menu-item">-->
+<!--          <div class="nav-item-wrapper">-->
+<!--            <div class="nav-item">-->
+<!--              <i class="icon nav-item-icon material-icons-outlined icon-no-color">insights</i>-->
+<!--              <span class="nav-item-title">Insights</span>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </inertia-link>-->
 
         <inertia-link :href="route('reports')" class="nav-menu-item">
           <div class="nav-item-wrapper">

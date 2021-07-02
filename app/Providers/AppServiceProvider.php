@@ -12,6 +12,7 @@ use App\Repositories\DataRepository;
 use App\Services\DataService;
 use ConsoleTVs\Charts\Registrar as Charts;
 use Illuminate\Database\Console\Migrations\FreshCommand;
+use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 
@@ -22,16 +23,20 @@ class AppServiceProvider extends ServiceProvider {
 	 * @return void
 	 */
 	public function register() {
-		//
+		Collection::macro('sortByDate', function (string $column = 'created_at', bool $descending = false) {
+			/* @var $this Collection */
+			return $this->sortBy(function ($datum) use ($column) {
+				return strtotime(((object)$datum)->$column);
+			}, SORT_REGULAR, $descending);
+		});
 	}
 
 	/**
 	 * Bootstrap any application services.
 	 *
-	 * @param Charts $charts
 	 * @return void
 	 */
-	public function boot(Charts $charts) {
+	public function boot() {
 		// Replace default migrate:fresh command class
 		$this->app->bind(FreshCommand::class, MigrateFreshCommand::class);
 

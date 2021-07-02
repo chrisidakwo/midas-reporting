@@ -22,8 +22,7 @@
                       <option value=""></option>
                       <option value="1">Traveller Statistics</option>
                       <option value="2">Statistics By Nationality</option>
-                      <option value="3">Movement Statistics</option>
-                      <option value="4">Daily Movement Statistics</option>
+                      <option value="3">Daily Movement Statistics</option>
                     </select>
                   </div>
                 </div>
@@ -59,7 +58,7 @@
               <div class="row">
                 <div class="col">
                   <div class="mx-4 mb-4">
-                    <button class="btn btn-primary me-2" type="submit" :disabled="loading">View Data</button>
+                    <button class="btn btn-primary me-2" type="submit" :disabled="loading">View Report</button>
                     <button class="btn btn-secondary text-white me-2" @click="downloadReport('statistics')" type="button" :disabled="loading">Download Statistical Report</button>
                     <button class="btn btn-secondary text-white me-2" @click="downloadReport('data')" type="button" :disabled="loading">Download Data Report</button>
                   </div>
@@ -80,9 +79,7 @@
             </div>
 
             <div class="px-4 pb-4">
-              <div v-if="reportType == 1 || reportType == 2">
-                <traveller-statistics-count :stats="stats" />
-              </div>
+              <traveller-statistics-count :stats="stats" />
             </div>
           </app-card>
         </div>
@@ -99,6 +96,8 @@
 
               <div class="px-4 pb-4">
                 <div>
+                  <traveller-statistics-table v-if="reportType == 1" :series="series" :stats="stats" :pagination-links="paginate" />
+
                   <div v-if="reportType == 2" class="mb-4 w-25">
                     <label for="ddlNationalityChartType" class="form-label">Display Data As:</label>
                     <select v-model="nationalityChartType" id="ddlNationalityChartType" class="form-select">
@@ -106,12 +105,20 @@
                       <option value="chart">Chart</option>
                     </select>
                   </div>
-
-
-                  <traveller-statistics-table v-if="reportType == 1" :series="series" :stats="stats" :pagination-links="paginate" />
-                  <nationality-statistics-table v-if="reportType == 2 && nationalityChartType == 'table'" :series="series" />
+                  <nationality-statistics-table v-if="reportType == 2 && nationalityChartType == 'table'" :series="series" :pagination-links="paginate" />
                   <nationality-statistics-chart v-if="reportType == 2 && nationalityChartType == 'chart'" :series="series" />
-                  <div v-else class="d-flex align-items-center justify-content-center mt-10">
+
+                  <div v-if="reportType == 3" class="mb-4 w-25">
+                    <label for="ddlDailyStatisticsChartType" class="form-label">Display Data As:</label>
+                    <select v-model="dailyStatisticsChartType" id="ddlDailyStatisticsChartType" class="form-select">
+                      <option value="table">Table</option>
+                      <option value="chart">Chart</option>
+                    </select>
+                  </div>
+                  <daily-movement-statistics-table v-if="reportType == 3 && dailyStatisticsChartType == 'table'" :series="series" />
+                  <daily-movement-statistics-chart v-if="reportType == 3 && dailyStatisticsChartType == 'chart'" :series="series" />
+
+                  <div v-if="!reportType" class="d-flex align-items-center justify-content-center mt-10">
                     Generate a report
                   </div>
                 </div>
@@ -132,9 +139,13 @@ import TravellerStatisticsTable from "../Components/Reports/TravellerStatistics/
 import TravellerStatisticsCount from "../Components/Reports/TravellerStatistics/TravellerStatisticsCount";
 import NationalityStatisticsTable from "../Components/Reports/NationalityStatistics/NationalityStatisticsTable";
 import NationalityStatisticsChart from "../Components/Reports/NationalityStatistics/NationalityStatisticsChart";
+import DailyMovementStatisticsTable from "../Components/Reports/DailyMovementStatistics/DailyMovementStatisticsTable";
+import DailyMovementStatisticsChart from "../Components/Reports/DailyMovementStatistics/DailyMovementStatisticsChart";
 
 export default {
   components: {
+    DailyMovementStatisticsChart,
+    DailyMovementStatisticsTable,
     NationalityStatisticsChart,
     NationalityStatisticsTable, TravellerStatisticsTable, AppLayout, AppCard, TravellerStatisticsCount},
   props: {
@@ -180,6 +191,7 @@ export default {
     return {
       loading: false,
       nationalityChartType: 'table',
+      dailyStatisticsChartType: 'table',
     }
   },
   methods: {

@@ -1,5 +1,7 @@
 <template>
-  <g-chart type="Table" :data="chartSeries" class="mb-3" />
+  <g-chart type="Table" :data="chartSeries" class="mb-3" :options="chartOptions" />
+
+  <div v-html="paginationLinks"></div>
 </template>
 
 <script>
@@ -11,6 +13,10 @@ export default {
     series: {
       type: Array,
       default: []
+    },
+    paginationLinks: {
+      type: String,
+      default: ''
     }
   },
   setup(props) {
@@ -21,6 +27,14 @@ export default {
     chartSeries.unshift(['Country', 'Total Entry', 'Total Exit', 'Total Travellers']);
 
     return { chartSeries };
+  },
+  data() {
+    return {
+      chartOptions: {
+        width: '100%',
+        height: '100%'
+      }
+    }
   }
 }
 </script>

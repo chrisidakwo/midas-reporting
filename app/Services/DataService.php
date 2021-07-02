@@ -95,7 +95,7 @@ class DataService implements DataRepository {
 				return $builder->select($columns);
 			});
 
-			return ($paginate) ? $result->simplePaginate(50) : $result->get();
+			return ($paginate) ? $result->simplePaginate(30) : $result->get();
 		});
 	}
 

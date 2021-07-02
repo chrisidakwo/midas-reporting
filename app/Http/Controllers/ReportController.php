@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia;
 use Inertia\Response;
@@ -68,9 +69,11 @@ class ReportController extends Controller {
 				$result = $this->dataRepository->getTravellersReportStatistics($startDate, $endDate, null, $borderPoint);
 				$stats = $this->_getGenericTravelStatistics($result);
 			} else if ($reportType == '3') {
-				// Get movement statistics
-			} else if ($reportType == '4') {
-				// Get daily movement statistics
+				$series = $this->_buildDailyMovementStatisticsSeries($startDate, $endDate, $borderPoint);
+
+				// Get statistical count
+				$result = $this->dataRepository->getTravellersReportStatistics($startDate, $endDate, null, $borderPoint);
+				$stats = $this->_getGenericTravelStatistics($result);
 			}
 		}
 
@@ -166,41 +169,69 @@ class ReportController extends Controller {
 					}
 				}
 			} else if ($reportType == '2') {
-				// Get statistics count
-				if ($type == 'statistics') {
-					$result = $this->dataRepository->getTravellersReportStatistics($startDate, $endDate, null, $borderPoint);
-					$stats = $this->_getGenericTravelStatistics($result);
-					$alphabets = self::ALPHABETS;
+				$series = $this->_buildStatisticsByNationalitySeries($startDate, $endDate, $borderPoint);
 
-					$this->_buildSpreadsheetForGenericTravelStat($activeSheet, $startDate, $endDate, $alphabets, $stats);
+				$header = ['Country', 'Total Travellers', 'Total Entry', 'Total Exit'];
+
+				// Set header row
+				$headerLen = count($header);
+				$alphabets = self::ALPHABETS;
+
+				for ($i = 0; $i < $headerLen; $i++) {
+					$activeSheet->setCellValue("$alphabets[$i]1", $header[$i]);
 				}
 
-				if ($type == 'data') {
-					$series = $this->_buildStatisticsByNationalitySeries($startDate, $endDate, $borderPoint);
+				// Append data
+				$dataLen = count($series);
+				for ($i = 0; $i < $dataLen; $i++) {
+					$rowNumber = $i + 2;
+					$activeSheet->setCellValue("A$rowNumber", $series[$i][0])
+						->setCellValue("B$rowNumber", $series[$i][1] + $series[$i][2])
+						->setCellValue("C$rowNumber", $series[$i][1])
+						->setCellValue("D$rowNumber", $series[$i][2]);
+				}
+
+				// Format number column
+				$activeSheet->getStyle('B2:D' . ($dataLen + 1))->getNumberFormat()
+					->setFormatCode('#,##0');
+
+				// Auto Set the Size of Columns
+				foreach (range('A', 'D') as $columnID) {
+					$activeSheet->getColumnDimension($columnID)->setAutoSize(true);
 				}
 			} else if ($reportType == '3') {
-				// Get statistics count
-				if ($type == 'statistics') {
-					$result = $this->dataRepository->getTravellersReportStatistics($startDate, $endDate, null, $borderPoint);
-					$stats = $this->_getGenericTravelStatistics($result);
-					$alphabets = self::ALPHABETS;
+				$series = $this->_buildDailyMovementStatisticsSeries($startDate, $endDate, $borderPoint);
 
-					$this->_buildSpreadsheetForGenericTravelStat($activeSheet, $startDate, $endDate, $alphabets, $stats);
+				$header = array_slice($series, 0, 1)[0];
+
+				// Set header row
+				$headerLen = count($header);
+				$alphabets = self::ALPHABETS;
+
+				for ($i = 0; $i < $headerLen; $i++) {
+					$activeSheet->setCellValue("$alphabets[$i]1", $header[$i]);
 				}
 
+				// Append data
+				$dataLen = count($series);
+				for ($i = 1; $i < $dataLen; $i++) { // Start $i at 1 so we can omit the header
+					$rowNumber = $i + 1;
 
-				$header = [];
-			} else if ($reportType == '4') {
-				// Get statistics count
-				if ($type == 'statistics') {
-					$result = $this->dataRepository->getTravellersReportStatistics($startDate, $endDate, null, $borderPoint);
-					$stats = $this->_getGenericTravelStatistics($result);
-					$alphabets = self::ALPHABETS;
-
-					$this->_buildSpreadsheetForGenericTravelStat($activeSheet, $startDate, $endDate, $alphabets, $stats);
+					$activeSheet->setCellValue("A$rowNumber", $series[$i][0])
+						->setCellValue("B$rowNumber", $series[$i][1])
+						->setCellValue("C$rowNumber", $series[$i][2])
+						->setCellValue("D$rowNumber", $series[$i][3])
+						->setCellValue("E$rowNumber", $series[$i][4]);
 				}
 
-				$header = [];
+				// Format number column
+				$activeSheet->getStyle("B2:E$dataLen")->getNumberFormat()
+					->setFormatCode('#,##0');
+
+				// Auto Set the Size of Columns
+				foreach (range('A', 'E') as $columnID) {
+					$activeSheet->getColumnDimension($columnID)->setAutoSize(true);
+				}
 			}
 
 			$reportTypeName = Str::slug(ReportTypes::VALUES[$reportType]);
@@ -308,5 +339,33 @@ class ReportController extends Controller {
 
 			return $carry;
 		}, []);
+	}
+
+	/**
+	 * @param Carbon $startDate
+	 * @param Carbon $endDate
+	 * @param array $borderPoint
+	 * @return array
+	 */
+	private function _buildDailyMovementStatisticsSeries(Carbon $startDate, Carbon $endDate, array $borderPoint): array {
+		// @see: https://tableplus.com/blog/2018/09/ms-sql-server-how-to-get-date-only-from-datetime-value.html
+		$columns = [DB::raw('CONVERT(VARCHAR(10), TravelDate, 105) as TravelDate'), 'OfficialName', 'MovementDirection'];
+
+		$series = $this->dataRepository->getTravellersReportStatistics($startDate, $endDate, null, $borderPoint, $columns)
+			->sortByDate('TravelDate')->groupBy(['TravelDate', 'MovementDirection'])->reduce(function ($carry, $item, $date) {
+				$arrivalCount = $item['Arrival']->count();
+				$departureCount = $item['Departure']->count();
+
+				$residentsCount = $item['Arrival']->where('OfficialName', 'Nigeria')->count() + $item['Departure']->where('OfficialName', 'Nigeria')->count();
+				$nonResidentsCount = $item['Arrival']->where('OfficialName', '!=', 'Nigeria')->count() + $item['Departure']->where('OfficialName', '!=', 'Nigeria')->count();
+
+				$carry[] = [$date, $arrivalCount, $departureCount, $residentsCount, $nonResidentsCount];
+
+				return $carry;
+			}, []);
+
+		array_unshift($series, ['Travel Date', 'Total Entry', 'Total Exit', 'Residents', 'Non-Residents']);
+
+		return $series;
 	}
 }
